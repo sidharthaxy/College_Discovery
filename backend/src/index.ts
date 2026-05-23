@@ -22,6 +22,9 @@ app.use(express.json());
 import collegesRouter from './routes/colleges';
 app.use('/api/colleges', collegesRouter);
 
+import reviewsRouter from './routes/reviews';
+app.use('/api/reviews', reviewsRouter);
+
 // Health Check / Diagnostics
 app.get('/', (req, res) => {
   res.json({

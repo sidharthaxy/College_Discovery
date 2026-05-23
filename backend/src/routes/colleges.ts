@@ -85,4 +85,39 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /api/colleges/:slug
+router.get('/:slug', async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    const college = await prisma.college.findUnique({
+      where: { slug },
+      include: {
+        courses: {
+          orderBy: { name: 'asc' }
+        },
+        placements: {
+          orderBy: { year: 'desc' }
+        },
+        cutoffs: {
+          orderBy: { cutoffRank: 'asc' }
+        },
+        reviews: {
+          where: { status: 'APPROVED' },
+          orderBy: { createdAt: 'desc' }
+        }
+      }
+    });
+
+    if (!college) {
+      return res.status(404).json({ error: 'College not found' });
+    }
+
+    res.json(college);
+  } catch (error: any) {
+    console.error('Error fetching college details:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;
