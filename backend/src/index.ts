@@ -19,6 +19,9 @@ app.use(cors({
 
 app.use(express.json());
 
+import collegesRouter from './routes/colleges';
+app.use('/api/colleges', collegesRouter);
+
 // Health Check / Diagnostics
 app.get('/', (req, res) => {
   res.json({
