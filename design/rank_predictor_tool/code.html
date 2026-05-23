@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#d4e3ff",
+                        "surface-tint": "#476083",
+                        "on-error": "#ffffff",
+                        "surface-container-low": "#eff4ff",
+                        "primary": "#000613",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "error": "#ba1a1a",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed-dim": "#4edea3",
+                        "error-container": "#ffdad6",
+                        "surface": "#f8f9ff",
+                        "surface-container": "#e5eeff",
+                        "secondary-container": "#6cf8bb",
+                        "on-secondary-fixed": "#002113",
+                        "on-tertiary-container": "#848789",
+                        "secondary": "#006c49",
+                        "on-secondary": "#ffffff",
+                        "on-surface": "#0b1c30",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "on-secondary-fixed-variant": "#005236",
+                        "on-error-container": "#93000a",
+                        "surface-container-high": "#dce9ff",
+                        "on-secondary-container": "#00714d",
+                        "surface-variant": "#d3e4fe",
+                        "on-primary-fixed": "#001c3a",
+                        "tertiary": "#040607",
+                        "inverse-primary": "#afc8f0",
+                        "outline-variant": "#c4c6cf",
+                        "surface-bright": "#f8f9ff",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-background": "#0b1c30",
+                        "outline": "#74777f",
+                        "primary-fixed-dim": "#afc8f0",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-primary-fixed-variant": "#2f486a",
+                        "tertiary-fixed": "#e0e3e5",
+                        "on-primary-container": "#6f88ad",
+                        "tertiary-container": "#1c1f21",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-dim": "#cbdbf5",
+                        "inverse-surface": "#213145",
+                        "background": "#f8f9ff",
+                        "primary-container": "#001f3f",
+                        "on-surface-variant": "#43474e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "max-width": "1280px",
+                        "margin-desktop": "48px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-xl": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "26px", "fontWeight": "400"}],
+                        "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "label-sm": ["11px", {"lineHeight": "14px", "fontWeight": "500"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-xl": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background font-body-md text-on-surface">
+<!-- TopNavBar -->
+<header class="bg-surface-container-lowest dark:bg-primary-container w-full h-16 border-b border-outline-variant dark:border-outline z-50 sticky top-0">
+<div class="flex justify-between items-center px-margin-desktop max-w-max-width mx-auto h-full">
+<div class="flex items-center gap-8">
+<span class="text-headline-sm font-headline-sm font-bold text-primary dark:text-primary-fixed">CollegeMVP</span>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-on-surface-variant dark:text-on-primary-fixed-variant hover:text-primary dark:hover:text-primary-fixed transition-colors duration-200 font-body-md text-body-md" href="#">Browse</a>
+<a class="text-primary dark:text-primary-fixed font-bold border-b-2 border-primary dark:border-primary-fixed pb-1 font-body-md text-body-md" href="#">Predictor</a>
+<a class="text-on-surface-variant dark:text-on-primary-fixed-variant hover:text-primary dark:hover:text-primary-fixed transition-colors duration-200 font-body-md text-body-md" href="#">Compare (0)</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant font-body-md text-body-md hover:text-primary transition-colors">Sign In</button>
+<button class="bg-primary text-on-primary px-4 py-2 rounded font-label-md text-label-md">Get Started</button>
+</div>
+</div>
+</header>
+<main class="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-12 min-h-[calc(100vh-64px-200px)]">
+<!-- Hero Title Section -->
+<div class="text-center mb-12">
+<h1 class="font-headline-xl text-headline-xl text-primary mb-2">Rank Predictor</h1>
+<p class="text-on-surface-variant font-body-lg text-body-lg max-w-2xl mx-auto">Input your details to receive precise, data-backed institutional recommendations based on historical cutoff trends.</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Predictor Form Card (Left/Center Column) -->
+<div class="lg:col-start-3 lg:col-span-8">
+<div class="bg-white border border-outline-variant p-8 shadow-sm">
+<form class="space-y-6" id="predictorForm">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Exam Selection -->
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Exam</label>
+<div class="relative">
+<select class="w-full bg-white border border-outline-variant focus:border-primary focus:ring-0 px-3 py-3 font-body-md text-body-md appearance-none cursor-pointer">
+<option value="jee-main">JEE Main</option>
+<option value="jee-adv">JEE Advanced</option>
+<option value="bitsat">BITSAT</option>
+<option value="neet">NEET</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
+</div>
+</div>
+<!-- Rank Input -->
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Rank</label>
+<input class="w-full bg-white border border-outline-variant focus:border-primary focus:ring-0 px-3 py-3 font-body-md text-body-md" placeholder="Enter your rank" type="number"/>
+</div>
+<!-- Category Selection -->
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Category</label>
+<div class="relative">
+<select class="w-full bg-white border border-outline-variant focus:border-primary focus:ring-0 px-3 py-3 font-body-md text-body-md appearance-none cursor-pointer">
+<option value="general">General</option>
+<option value="obc">OBC-NCL</option>
+<option value="sc">SC</option>
+<option value="st">ST</option>
+<option value="ews">EWS</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
+</div>
+</div>
+</div>
+<div class="pt-4">
+<button class="w-full md:w-auto bg-primary text-on-primary px-12 py-4 font-headline-sm text-headline-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2" type="submit">
+                                Find My Colleges
+                                <span class="material-symbols-outlined">analytics</span>
+</button>
+</div>
+</form>
+</div>
+<!-- Results Area (Initially Hidden or showing placeholder) -->
+<div class="mt-12 space-y-4" id="resultsArea">
+<div class="flex items-center justify-between border-b border-outline-variant pb-4 mb-6">
+<h2 class="font-headline-md text-headline-md text-primary">Recommended Matches</h2>
+<span class="font-body-sm text-body-sm text-on-surface-variant">12 Colleges Found</span>
+</div>
+<!-- Recommended Rows -->
+<div class="space-y-2">
+<!-- Row 1 -->
+<div class="group bg-white border border-outline-variant p-4 flex flex-col md:flex-row md:items-center justify-between hover:bg-surface-container-low transition-colors duration-200">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-surface-container flex items-center justify-center border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional architectural photograph of a prestigious university campus building with traditional brickwork and modern glass elements. The scene is shot during high noon with sharp shadows and clear blue skies, emphasizing a clean, academic, and elite institutional atmosphere with high-key lighting and professional color grading." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcgdX3uNZ4Gyd8u4LSLNkrBPImsHnqsauU0IJqk3KB2jBNQLir-oKcCtl0ezgO2BIWwb8MQjA8xpWSCopkYAQKOxoZ2k8IbfWCk0zTtim6QYQ_09ZuC3zctUlEAm2a4nhKnzI1jrs-RTYO5_9IMsjP935hbx5l0C-yvtcxfi-xXhHUw6zJgQMjuCoWDiKM30Q_WdKCBanL1x_QPRjlDMiEMzavnjEtry2LYsPRdfApLrgaFYrCjSUO-pN8u3C-8sFx4dJ2lRH1T55x"/>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-primary group-hover:text-secondary transition-colors">Indian Institute of Technology, Bombay</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">location_on</span> Mumbai, MH
+                                    </p>
+</div>
+</div>
+<div class="mt-4 md:mt-0 flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-1">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase">Historical Cutoff</span>
+<span class="font-headline-sm text-headline-sm text-primary">450</span>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="group bg-white border border-outline-variant p-4 flex flex-col md:flex-row md:items-center justify-between hover:bg-surface-container-low transition-colors duration-200">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-surface-container flex items-center justify-center border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="An expansive view of a modern university library with large floor-to-ceiling windows and students engaged in collaborative study. The interior is bright, airy, and features minimalist furniture in tones of slate and birch. The lighting is soft and natural, creating an atmosphere of focused academic excellence and technical precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYjs_LQRYE1hBD22npkbR95BHbdi-peRQzX0-4KQaLkwqe4tsaGA4IRuumg8Rv8MLd8yC9tNjNnLIMF8P3tFqnTHFOYzxbxBA48SU2cNNk-FpNTwZWFXMwMELtxKuXi-oB1Jz01xYH0Y9CUE0Dh_8Ux82iBlx9KDkLPe3yuS06UHIVAtiWHZtcbbH-ErkkWfh8Ydjiuv7fzR_DRoEYiOjTUeIPUEVs4tROc4BFmxj6PdRzuL4AOak915tuzLhQ9dB6Fane76slaONS"/>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-primary group-hover:text-secondary transition-colors">IIT Delhi</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">location_on</span> New Delhi, DL
+                                    </p>
+</div>
+</div>
+<div class="mt-4 md:mt-0 flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-1">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase">Historical Cutoff</span>
+<span class="font-headline-sm text-headline-sm text-primary">512</span>
+</div>
+</div>
+<!-- Row 3 -->
+<div class="group bg-white border border-outline-variant p-4 flex flex-col md:flex-row md:items-center justify-between hover:bg-surface-container-low transition-colors duration-200">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-surface-container flex items-center justify-center border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A sharp, clear image of a technical university's engineering block featuring sleek steel and glass facades. The lighting is crisp afternoon sun casting long, rhythmic shadows on a paved courtyard. The visual style is modern, professional, and corporate, with a color palette emphasizing clean whites and deep navy blues to suggest reliability and innovation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdhtQlLzI-JAbpdI5ISjv4ahpbu6Mjr1cxdtRGAq-j6MUx9MjiliQmMRfOitJVFDVru2iC8z-OsDh_SxWUoeYVUBRV78jZBobY-x4PE90IP1COj0FMk9a0_Gsx9MNPVW1KrCCNBstzb8xx7D4mS3Elu4sb1QhCYtVKekBe3cu2YZ81rx8AwVluQJl53ues85GGAQO6tbFZDCgxT3poPmeXcb5yHdQj2p_DcN3WvQwaBoPeNyBjLVhiDLGkxNTY50MiIwrgSHDXqYu-"/>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-primary group-hover:text-secondary transition-colors">IIT Madras</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">location_on</span> Chennai, TN
+                                    </p>
+</div>
+</div>
+<div class="mt-4 md:mt-0 flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-1">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase">Historical Cutoff</span>
+<span class="font-headline-sm text-headline-sm text-primary">605</span>
+</div>
+</div>
+<!-- Row 4 -->
+<div class="group bg-white border border-outline-variant p-4 flex flex-col md:flex-row md:items-center justify-between hover:bg-surface-container-low transition-colors duration-200">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-surface-container flex items-center justify-center border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A focused close-up of a student working on a high-performance laptop in a bright, modern university setting. The background shows a bokeh effect of a technologically advanced laboratory. The lighting is cool and professional, reflecting the high-achieving student target audience. The palette is dominated by clean greys, whites, and corporate navy blue accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYkeo6FCanaUVcjOdD1-K7M7Xf09vbGTfk_p_shZuX-Y2J2TB4rJIQfNhLRsCUJSopOHsUAxVww-ZvNo5Bd7HtsoZ18vOzSLVg45gjJr_91LDxZvaXvGLxV8d1Jn2nSXphMgNnMHaS7jY8ihWSROGyyZ9WlonJ8YvfOPWl5X10rmQZVezW26t2hDjSj7cfWZJHyXrGj-8K1i43GfePIVPMI-Pv___glGcc88vlM-y4Ci7kFa7TuDD7QNi8r8i1Wt5DQh_A63P9fKpO"/>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-primary group-hover:text-secondary transition-colors">IIT Kanpur</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">location_on</span> Kanpur, UP
+                                    </p>
+</div>
+</div>
+<div class="mt-4 md:mt-0 flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-1">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase">Historical Cutoff</span>
+<span class="font-headline-sm text-headline-sm text-primary">720</span>
+</div>
+</div>
+</div>
+<div class="pt-8 text-center">
+<button class="text-primary font-label-md text-label-md uppercase tracking-widest border-b border-primary pb-1 hover:opacity-70 transition-opacity">View All Matches</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface dark:bg-primary-container border-t border-outline-variant dark:border-outline w-full py-12">
+<div class="flex flex-col md:flex-row justify-between items-center px-margin-desktop max-w-max-width mx-auto gap-gutter">
+<div class="flex flex-col items-center md:items-start gap-4">
+<span class="text-headline-sm font-headline-sm font-bold text-primary dark:text-primary-fixed">CollegeMVP</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-on-primary-fixed-variant text-center md:text-left">© 2024 CollegeMVP. Technical precision for academic success.</p>
+</div>
+<div class="flex gap-8">
+<a class="font-body-sm text-body-sm text-on-surface-variant dark:text-on-primary-fixed-variant hover:text-primary transition-colors" href="#">About Us</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant dark:text-on-primary-fixed-variant hover:text-primary transition-colors" href="#">Data Sources</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant dark:text-on-primary-fixed-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant dark:text-on-primary-fixed-variant hover:text-primary transition-colors" href="#">Contact</a>
+</div>
+</div>
+</footer>
+<script>
+        // Simple micro-interaction for the form
+        document.getElementById('predictorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const results = document.getElementById('resultsArea');
+            results.classList.add('opacity-50');
+            setTimeout(() => {
+                results.classList.remove('opacity-50');
+                // Scroll to results on mobile
+                if(window.innerWidth < 768) {
+                    results.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 600);
+        });
+
+        // Hover effect on rows
+        const rows = document.querySelectorAll('.group');
+        rows.forEach(row => {
+            row.addEventListener('mouseenter', () => {
+                row.style.transform = 'translateY(-2px)';
+                row.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
+            });
+            row.addEventListener('mouseleave', () => {
+                row.style.transform = 'translateY(0)';
+                row.style.boxShadow = 'none';
+            });
+        });
+    </script>
+</body></html>

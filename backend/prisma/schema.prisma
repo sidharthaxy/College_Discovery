@@ -1,0 +1,71 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model College {
+  id             Int         @id @default(autoincrement())
+  slug           String      @unique
+  name           String
+  logoUrl        String
+  coverUrl       String
+  rating         Float       @default(0.0)
+  location       String
+  description    String
+  fees           Int         // Max annual fees in INR
+  intake         Int         // Total annual intake
+  avgPackage     Float       // Average package in LPA
+  highestPackage Float       // Highest package in LPA
+  topRecruiters  String[]    // Top recruiters
+  courses        Course[]
+  placements     Placement[]
+  cutoffs        Cutoff[]
+  reviews        Review[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+model Course {
+  id        Int     @id @default(autoincrement())
+  name      String
+  fees      Int     // Fees for this course (INR)
+  duration  Int     // Duration in years
+  collegeId Int
+  college   College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+}
+
+model Placement {
+  id             Int     @id @default(autoincrement())
+  year           Int     // E.g., 2024
+  avgPackage     Float   // Average package in LPA
+  highestPackage Float   // Highest package in LPA
+  collegeId      Int
+  college        College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+}
+
+model Cutoff {
+  id         Int     @id @default(autoincrement())
+  exam       String  // E.g., JEE Advanced, JEE Main
+  category   String  // E.g., OPEN, OBC-NCL, SC, ST
+  branch     String  // E.g., Computer Science, Electrical
+  round      Int     // E.g., 1, 6
+  cutoffRank Int     // Cutoff rank value
+  collegeId  Int
+  college    College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id           Int      @id @default(autoincrement())
+  reviewerName String
+  rating       Int      // E.g., 1 to 5
+  comment      String
+  isVerified   Boolean  @default(false)
+  status       String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt    DateTime @default(now())
+  collegeId    Int
+  college      College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+}

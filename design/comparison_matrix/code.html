@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CollegeMVP | Comparison Matrix</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#d4e3ff",
+                    "surface-tint": "#476083",
+                    "on-error": "#ffffff",
+                    "surface-container-low": "#eff4ff",
+                    "primary": "#000613",
+                    "on-tertiary-fixed-variant": "#444749",
+                    "error": "#ba1a1a",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-fixed-dim": "#4edea3",
+                    "error-container": "#ffdad6",
+                    "surface": "#f8f9ff",
+                    "surface-container": "#e5eeff",
+                    "secondary-container": "#6cf8bb",
+                    "on-secondary-fixed": "#002113",
+                    "on-tertiary-container": "#848789",
+                    "secondary": "#006c49",
+                    "on-secondary": "#ffffff",
+                    "on-surface": "#0b1c30",
+                    "tertiary-fixed-dim": "#c4c7c9",
+                    "on-secondary-fixed-variant": "#005236",
+                    "on-error-container": "#93000a",
+                    "surface-container-high": "#dce9ff",
+                    "on-secondary-container": "#00714d",
+                    "surface-variant": "#d3e4fe",
+                    "on-primary-fixed": "#001c3a",
+                    "tertiary": "#040607",
+                    "inverse-primary": "#afc8f0",
+                    "outline-variant": "#c4c6cf",
+                    "surface-bright": "#f8f9ff",
+                    "secondary-fixed": "#6ffbbe",
+                    "on-tertiary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-fixed": "#191c1e",
+                    "on-background": "#0b1c30",
+                    "outline": "#74777f",
+                    "primary-fixed-dim": "#afc8f0",
+                    "surface-container-highest": "#d3e4fe",
+                    "on-primary-fixed-variant": "#2f486a",
+                    "tertiary-fixed": "#e0e3e5",
+                    "on-primary-container": "#6f88ad",
+                    "tertiary-container": "#1c1f21",
+                    "inverse-on-surface": "#eaf1ff",
+                    "surface-dim": "#cbdbf5",
+                    "inverse-surface": "#213145",
+                    "background": "#f8f9ff",
+                    "primary-container": "#001f3f",
+                    "on-surface-variant": "#43474e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "unit": "4px",
+                    "max-width": "1280px",
+                    "margin-desktop": "48px",
+                    "gutter": "24px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "label-md": ["Inter"],
+                    "headline-xl": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "26px", "fontWeight": "400"}],
+                    "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                    "label-sm": ["11px", {"lineHeight": "14px", "fontWeight": "500"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-xl": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: 240px repeat(3, 1fr);
+        }
+        .zebra-row:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        .win-highlight {
+            background-color: #D1FAE5 !important;
+            color: #065F46 !important;
+        }
+    </style>
+</head>
+<body class="bg-background font-body-md text-on-background">
+<!-- Top Navigation Bar -->
+<header class="bg-surface-container-lowest dark:bg-primary-container border-b border-outline-variant dark:border-outline w-full h-16 sticky top-0 z-50">
+<div class="flex justify-between items-center px-margin-desktop max-w-max-width mx-auto h-full">
+<div class="text-headline-sm font-headline-sm font-bold text-primary dark:text-primary-fixed">
+                CollegeMVP
+            </div>
+<nav class="hidden md:flex items-center gap-8 font-body-md text-body-md h-full">
+<a class="text-on-surface-variant dark:text-on-primary-fixed-variant hover:text-primary dark:hover:text-primary-fixed transition-colors duration-200" href="#">Browse</a>
+<a class="text-on-surface-variant dark:text-on-primary-fixed-variant hover:text-primary dark:hover:text-primary-fixed transition-colors duration-200" href="#">Predictor</a>
+<a class="text-primary dark:text-primary-fixed font-bold border-b-2 border-primary dark:border-primary-fixed pb-1 h-[calc(100%-2px)] flex items-center mt-0.5" href="#">Compare (3)</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="bg-primary text-on-primary font-label-md text-label-md px-6 py-2 rounded shadow-none hover:opacity-80 transition-opacity">
+                    Sign In
+                </button>
+</div>
+</div>
+</header>
+<main class="max-w-max-width mx-auto px-margin-desktop py-12">
+<!-- Header Section -->
+<div class="mb-12 border-l-4 border-primary pl-6">
+<h1 class="font-headline-xl text-headline-xl text-on-surface mb-2">Technical Comparison Matrix</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-3xl">Side-by-side performance analysis of Tier-1 Engineering Institutions. Metrics based on the 2024 academic cycle data.</p>
+</div>
+<!-- Comparison Matrix -->
+<div class="bg-surface-container-lowest border border-outline-variant overflow-hidden rounded-lg">
+<!-- Sticky Matrix Header -->
+<div class="matrix-grid bg-surface-container-high border-b border-outline-variant sticky top-16 z-10">
+<div class="p-6 flex items-center font-label-md text-label-md text-outline uppercase tracking-widest">Attributes</div>
+<!-- College 1 Header -->
+<div class="p-6 border-l border-outline-variant bg-white group hover:bg-surface-container-low transition-colors">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-md text-label-md text-primary bg-primary-fixed px-2 py-0.5 rounded">RANK #1</span>
+<button class="text-on-surface-variant hover:text-error transition-colors"><span class="material-symbols-outlined text-sm">close</span></button>
+</div>
+<img alt="IIT Bombay Campus" class="w-full h-24 object-cover rounded-sm mb-4" data-alt="A clean, cinematic photograph of the iconic IIT Bombay main building facade during the golden hour. The architecture is showcased with sharp, professional lines under a clear, warm sky. The lighting is soft yet analytical, reflecting a high-end academic institution's prestige. The color palette consists of neutral concrete tones and lush green campus landscaping." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDahSVMdUajFnp3EsFd85Ok7pnHbOyIl6mvuP418DThoqL4_xPB2pZh_TbEuVu5an0Q3b8pp7hXntkZONAeq2AARr9qr4DP-yQSCmkdxS2TSvZKHepZzTSoC53cawnjvDR_QxGd9uqNZzWvdfeJacirOPgdaIAlk5Zm6ZJ-rL7SYGnVD608k8LbBPeZmUcQaJY3XNVWRytqUdUqCy8Gtvm4wv5Dqvb_J167p0367J4PG6T1xg9vpt5o653fXjMh2n8b2lpH1tPCdhYq"/>
+<h3 class="font-headline-sm text-headline-sm text-primary">IIT Bombay</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Mumbai, Maharashtra</p>
+</div>
+<!-- College 2 Header -->
+<div class="p-6 border-l border-outline-variant bg-white hover:bg-surface-container-low transition-colors">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-md text-label-md text-primary bg-primary-fixed px-2 py-0.5 rounded">RANK #2</span>
+<button class="text-on-surface-variant hover:text-error transition-colors"><span class="material-symbols-outlined text-sm">close</span></button>
+</div>
+<img alt="IIT Delhi Campus" class="w-full h-24 object-cover rounded-sm mb-4" data-alt="A sharp, wide-angle architectural shot of the IIT Delhi administrative block featuring its distinctive modernist design. The image captures the structure's clean geometry against a bright midday sky, emphasizing transparency and technical precision. The lighting is high-key and even, avoiding harsh shadows to maintain a corporate, reliable atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-hqLIv3mVRlO-Ibg-_qxU-1c7T0Rt7ckPLKgDicPdWcCmEWeA540cJThjNU3l8N-9aPH9dDM2M0Zqow8MXQ3GhBB-YahxquRvMpn1Sufvb_hJ3x5LGXzFKfyA4s0araoTKzgirz7U7dYi1YDdR01Vkn9RT0YCBHp_J8CrhRnVV83j3g1-0G9fYCRdYPLLQUxrtudUHRSAOL0E7WqqPIzhWQ0-4uylEsOLK53AmqOYeubBvrjUWRem6yUhJDuORd2cNbaYUW2QPrMf"/>
+<h3 class="font-headline-sm text-headline-sm text-primary">IIT Delhi</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">New Delhi, NCR</p>
+</div>
+<!-- College 3 Header -->
+<div class="p-6 border-l border-outline-variant bg-white hover:bg-surface-container-low transition-colors">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-md text-label-md text-primary bg-primary-fixed px-2 py-0.5 rounded">RANK #25</span>
+<button class="text-on-surface-variant hover:text-error transition-colors"><span class="material-symbols-outlined text-sm">close</span></button>
+</div>
+<img alt="BITS Pilani Campus" class="w-full h-24 object-cover rounded-sm mb-4" data-alt="A high-resolution photograph of the grand Saraswati Temple at BITS Pilani, reflecting architectural excellence and academic tradition. The image is captured with a shallow depth of field, focusing on the intricate textures of the white marble. The scene is bright and airy, utilizing a palette of whites and soft grays to evoke a sense of purity and elite academic focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOEQKXOvar5yJbuR716wSMk5GR0upgVlk8P16R4AqMcB1cJtEgAQzAubbSrdTirm8K51OCt32YRp0U--Hb6qpB8NpT2rB6Lq490h5ndT_FFnUH2kjtWZYY3jLFT4MJSPOYESIqxUXpPxOP-rzD4gtIJ2uEJud4RNly2X-TrSTb77_CAGCUeeZCuaalhxvYCJczdNjamEz7snkYYYSYHRmhQo3bzF4l2KEZ4ksNU56IWdIQr836nv82PDyUSBQ14dqLhQTG_nu4QTKL"/>
+<h3 class="font-headline-sm text-headline-sm text-primary">BITS Pilani</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Pilani, Rajasthan</p>
+</div>
+</div>
+<!-- Matrix Rows -->
+<div class="divide-y divide-outline-variant">
+<!-- Location Row -->
+<div class="matrix-grid zebra-row">
+<div class="p-4 px-6 font-label-md text-label-md text-on-surface-variant flex items-center">LOCATION</div>
+<div class="p-4 border-l border-outline-variant font-body-md text-on-surface">Mumbai, MH</div>
+<div class="p-4 border-l border-outline-variant font-body-md text-on-surface">New Delhi, DL</div>
+<div class="p-4 border-l border-outline-variant font-body-md text-on-surface">Pilani, RJ</div>
+</div>
+<!-- Fees Row -->
+<div class="matrix-grid zebra-row">
+<div class="p-4 px-6 font-label-md text-label-md text-on-surface-variant flex items-center">FEES (ANNUAL)</div>
+<div class="p-4 border-l border-outline-variant font-body-md text-on-surface win-highlight">
+<div class="flex items-center gap-2">
+<span>₹2.10 Lakhs</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+</div>
+</div>
+<div class="p-4 border-l border-outline-variant font-body-md text-on-surface">₹2.25 Lakhs</div>
+<div class="p-4 border-l border-outline-variant font-body-md text-on-surface">₹5.40 Lakhs</div>
+</div>
+<!-- Intake Row -->
+<div class="matrix-grid zebra-row">
+<div class="p-4 px-6 font-label-md text-label-md text-on-surface-variant flex items-center">INTAKE (B.TECH)</div>
+<div class="p-4 border-l border-outline-variant font-body-md text-on-surface">1,036</div>
+<div class="p-4 border-l border-outline-variant font-body-md text-on-surface">1,209</div>
+<div class="p-4 border-l border-outline-variant font-body-md text-on-surface">~2,500</div>
+</div>
+<!-- Highest Package Row -->
+<div class="matrix-grid zebra-row">
+<div class="p-4 px-6 font-label-md text-label-md text-on-surface-variant flex items-center">HIGHEST PACKAGE</div>
+<div class="p-4 border-l border-outline-variant font-body-md text-on-surface win-highlight">
+<div class="flex items-center gap-2">
+<span>₹3.70 Crores</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">trending_up</span>
+</div>
+</div>
+<div class="p-4 border-l border-outline-variant font-body-md text-on-surface">₹2.40 Crores</div>
+<div class="p-4 border-l border-outline-variant font-body-md text-on-surface">₹60.75 Lakhs</div>
+</div>
+<!-- Average Package Row -->
+<div class="matrix-grid zebra-row">
+<div class="p-4 px-6 font-label-md text-label-md text-on-surface-variant flex items-center">AVERAGE PACKAGE</div>
+<div class="p-4 border-l border-outline-variant font-body-md text-on-surface win-highlight">₹21.82 Lakhs</div>
+<div class="p-4 border-l border-outline-variant font-body-md text-on-surface">₹21.40 Lakhs</div>
+<div class="p-4 border-l border-outline-variant font-body-md text-on-surface">₹20.15 Lakhs</div>
+</div>
+<!-- Top Recruiters Row -->
+<div class="matrix-grid zebra-row">
+<div class="p-4 px-6 font-label-md text-label-md text-on-surface-variant flex items-center">TOP RECRUITERS</div>
+<div class="p-4 border-l border-outline-variant flex flex-wrap gap-2">
+<span class="bg-surface-container px-2 py-1 rounded text-label-md font-label-md">Google</span>
+<span class="bg-surface-container px-2 py-1 rounded text-label-md font-label-md">Qualcomm</span>
+<span class="bg-surface-container px-2 py-1 rounded text-label-md font-label-md">Uber</span>
+</div>
+<div class="p-4 border-l border-outline-variant flex flex-wrap gap-2">
+<span class="bg-surface-container px-2 py-1 rounded text-label-md font-label-md">Microsoft</span>
+<span class="bg-surface-container px-2 py-1 rounded text-label-md font-label-md">Goldman Sachs</span>
+<span class="bg-surface-container px-2 py-1 rounded text-label-md font-label-md">Intel</span>
+</div>
+<div class="p-4 border-l border-outline-variant flex flex-wrap gap-2">
+<span class="bg-surface-container px-2 py-1 rounded text-label-md font-label-md">Amazon</span>
+<span class="bg-surface-container px-2 py-1 rounded text-label-md font-label-md">Apple</span>
+<span class="bg-surface-container px-2 py-1 rounded text-label-md font-label-md">Nvidia</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Call to Action -->
+<div class="mt-8 flex justify-end gap-4">
+<button class="border border-primary text-primary px-6 py-3 rounded-sm font-label-md text-label-md hover:bg-surface-container-low transition-colors">
+                Export Data (PDF)
+            </button>
+<button class="bg-primary text-on-primary px-8 py-3 rounded-sm font-label-md text-label-md hover:opacity-90 transition-opacity">
+                Schedule Counseling
+            </button>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface dark:bg-primary-container border-t border-outline-variant dark:border-outline w-full py-12">
+<div class="flex flex-col md:flex-row justify-between items-center px-margin-desktop max-w-max-width mx-auto gap-gutter">
+<div class="flex flex-col gap-2">
+<span class="text-headline-sm font-headline-sm font-bold text-primary dark:text-primary-fixed">CollegeMVP</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-on-primary-fixed-variant">
+                    © 2024 CollegeMVP. Technical precision for academic success.
+                </p>
+</div>
+<div class="flex flex-wrap justify-center gap-6 font-body-sm text-body-sm text-on-surface-variant dark:text-on-primary-fixed-variant">
+<a class="hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">About Us</a>
+<a class="hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Data Sources</a>
+<a class="hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Terms of Service</a>
+<a class="hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Contact</a>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interaction for table row highlighting on hover
+        document.querySelectorAll('.matrix-grid.zebra-row').forEach(row => {
+            row.addEventListener('mouseenter', () => {
+                row.classList.add('shadow-sm');
+                row.style.transform = 'translateX(4px)';
+                row.style.transition = 'all 0.2s ease-out';
+            });
+            row.addEventListener('mouseleave', () => {
+                row.classList.remove('shadow-sm');
+                row.style.transform = 'translateX(0)';
+            });
+        });
+    </script>
+</body></html>
