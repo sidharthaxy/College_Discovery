@@ -25,6 +25,9 @@ app.use('/api/colleges', collegesRouter);
 import reviewsRouter from './routes/reviews';
 app.use('/api/reviews', reviewsRouter);
 
+import predictRouter from './routes/predict';
+app.use('/api/predict', predictRouter);
+
 // Health Check / Diagnostics
 app.get('/', (req, res) => {
   res.json({
