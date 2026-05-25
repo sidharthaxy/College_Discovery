@@ -7,65 +7,159 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum Role {
+  USER
+  ADMIN
+  COLLEGE_REP
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+}
+
+// ==========================================
+// 1. CORE USER & AUTHENTICATION SYSTEMS
+// ==========================================
+model User {
+  id                 String             @id @default(uuid())
+  email              String             @unique
+  passwordHash       String?            // Secured argon2 or bcrypt string, optional for Google Auth
+  googleId           String?            @unique // For Google SSO
+  otpCode            String?            // Temporarily stores 6-digit OTP
+  otpExpiry          DateTime?          // Expiry time for OTP
+  name               String
+  role               Role               @default(USER)
+  createdAt          DateTime           @default(now())
+  
+  // Academic email mapping fields
+  collegeId          String?            
+  college            College?           @relation(fields: [collegeId], references: [id])
+  isVerifiedStudent  Boolean            @default(false)
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  
+  // Relations to other systems
+  reviews            Review[]
+  questions          Question[]         
+  answers            Answer[]           
+}
+
+// ==========================================
+// 2. COLLEGE SYSTEM
+// ==========================================
 model College {
-  id             Int         @id @default(autoincrement())
+  id             String      @id @default(uuid())
+  name           String      
   slug           String      @unique
-  name           String
-  logoUrl        String
-  coverUrl       String
+  location       String      // Format: "City, State"
   rating         Float       @default(0.0)
-  location       String
   description    String
-  fees           Int         // Max annual fees in INR
-  intake         Int         // Total annual intake
-  avgPackage     Float       // Average package in LPA
-  highestPackage Float       // Highest package in LPA
+  fees           Int         // Keep these for summary queries
+  intake         Int
+  avgPackage     Float
+  highestPackage Float
+  logoUrl        String?     // Cloudinary/S3 asset references
+  coverUrl       String?
+  searchTags     String      @default("") // Hidden string for search e.g. "IITM IIT Madras"
+  institutionType String     @default("Public") // e.g. Public, Private
+  allowedDomains String[]    // Suffixes for domain verification: ["iitbbs.ac.in"]
   topRecruiters  String[]    // Top recruiters
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
   courses        Course[]
   placements     Placement[]
   cutoffs        Cutoff[]
   reviews        Review[]
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  students       User[]
+  questions      Question[]  
+  exams          Exam[]
+
+  @@index([name])
+  @@index([location])
 }
 
 model Course {
-  id        Int     @id @default(autoincrement())
-  name      String
-  fees      Int     // Fees for this course (INR)
-  duration  Int     // Duration in years
-  collegeId Int
-  college   College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  id          String   @id @default(uuid())
+  collegeId   String
+  college     College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  name        String   
+  duration    Int      
+  fees        Int
 }
 
 model Placement {
-  id             Int     @id @default(autoincrement())
-  year           Int     // E.g., 2024
-  avgPackage     Float   // Average package in LPA
-  highestPackage Float   // Highest package in LPA
-  collegeId      Int
-  college        College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  id             String   @id @default(uuid())
+  collegeId      String
+  college        College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  year           Int
+  highestPackage Float    
+  avgPackage     Float    
+
+  @@index([avgPackage])
+}
+
+model Exam {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  scoringType String   @default("RANK") // "RANK" or "SCORE"
+  formSchema  Json
+  colleges    College[]
+  cutoffs     Cutoff[]
 }
 
 model Cutoff {
-  id         Int     @id @default(autoincrement())
-  exam       String  // E.g., JEE Advanced, JEE Main
-  category   String  // E.g., OPEN, OBC-NCL, SC, ST
-  branch     String  // E.g., Computer Science, Electrical
-  round      Int     // E.g., 1, 6
-  cutoffRank Int     // Cutoff rank value
-  collegeId  Int
-  college    College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  id          String   @id @default(uuid())
+  collegeId   String
+  college     College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  examId      String
+  exam        Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  criteria    Json     
+  cutoffValue Int      
+
+  @@index([cutoffValue])
 }
 
+// ==========================================
+// 3. REVIEWS & TRUST ARCHITECTURE
+// ==========================================
 model Review {
-  id           Int      @id @default(autoincrement())
-  reviewerName String
-  rating       Int      // E.g., 1 to 5
-  comment      String
-  isVerified   Boolean  @default(false)
-  status       String   @default("PENDING") // PENDING, APPROVED, REJECTED
-  createdAt    DateTime @default(now())
-  collegeId    Int
-  college      College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collegeId        String
+  college          College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  rating           Int
+  comment          String
+  isVerified       Boolean  @default(false) 
+  status           String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt        DateTime @default(now())
+}
+
+// ==========================================
+// 4. Q&A PLATFORM (MODULAR & EXPANDABLE)
+// ==========================================
+model Question {
+  id          String   @id @default(uuid())
+  title       String   
+  content     String
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collegeId   String
+  college     College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  answers     Answer[]
+}
+
+model Answer {
+  id         String   @id @default(uuid())
+  content    String
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
 }

@@ -36,6 +36,7 @@ export default function Discover() {
   const [maxFees, setMaxFees] = useState(Number(searchParams.get('maxFees')) || 50); // Lakhs
   const [location, setLocation] = useState(searchParams.get('location') || 'All Locations');
   const [minRating, setMinRating] = useState(searchParams.get('rating') || '');
+  const [institutionType, setInstitutionType] = useState(searchParams.get('institutionType') || 'All');
 
   // API State
   const [colleges, setColleges] = useState<College[]>([]);
@@ -50,7 +51,7 @@ export default function Discover() {
     const updated = new URLSearchParams(searchParams);
     
     Object.entries(newParams).forEach(([key, val]) => {
-      if (val === null || val === '' || val === 'All Locations' || (key === 'maxFees' && val === 50)) {
+      if (val === null || val === '' || val === 'All Locations' || val === 'All' || (key === 'maxFees' && val === 50)) {
         updated.delete(key);
       } else {
         updated.set(key, String(val));
@@ -91,6 +92,11 @@ export default function Discover() {
         const urlRating = searchParams.get('rating');
         if (urlRating) queryParams.append('rating', urlRating);
 
+        const urlInstType = searchParams.get('institutionType');
+        if (urlInstType && urlInstType !== 'All') {
+          queryParams.append('institutionType', urlInstType);
+        }
+
         const urlPage = searchParams.get('page') || '1';
         queryParams.append('page', urlPage);
         queryParams.append('limit', '4'); // Limit 4 cards per page as in mockup structure
@@ -119,6 +125,7 @@ export default function Discover() {
     setMaxFees(Number(searchParams.get('maxFees')) || 50);
     setLocation(searchParams.get('location') || 'All Locations');
     setMinRating(searchParams.get('rating') || '');
+    setInstitutionType(searchParams.get('institutionType') || 'All');
   }, [searchParams]);
 
   const handleSearchChange = (val: string) => {
@@ -142,6 +149,11 @@ export default function Discover() {
     updateUrlParams({ rating: nextRating });
   };
 
+  const handleInstitutionTypeChange = (val: string) => {
+    setInstitutionType(val);
+    updateUrlParams({ institutionType: val });
+  };
+
   const handlePageChange = (page: number) => {
     updateUrlParams({ page });
   };
@@ -151,6 +163,7 @@ export default function Discover() {
     setMaxFees(50);
     setLocation('All Locations');
     setMinRating('');
+    setInstitutionType('All');
     setSearchParams(new URLSearchParams());
   };
 
@@ -168,7 +181,7 @@ export default function Discover() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
       {/* Filters Sidebar - 3 Columns */}
-      <aside className="md:col-span-3 space-y-6">
+      <aside className="md:col-span-3 space-y-6 md:sticky md:top-24 max-h-[calc(100vh-6rem)] overflow-y-auto overflow-x-hidden scrollbar-hide">
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
             <h2 className="text-lg font-bold text-navy-900 tracking-tight">Filters</h2>
@@ -240,6 +253,25 @@ export default function Discover() {
               <option value="Karnataka">Karnataka</option>
               <option value="Delhi NCR">Delhi NCR</option>
               <option value="Odisha">Odisha</option>
+              <option value="Rajasthan">Rajasthan</option>
+              <option value="Uttar Pradesh">Uttar Pradesh</option>
+              <option value="Kerala">Kerala</option>
+            </select>
+          </div>
+
+          {/* Institution Type Dropdown */}
+          <div className="mb-6">
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+              Institution Type
+            </label>
+            <select
+              value={institutionType}
+              onChange={(e) => handleInstitutionTypeChange(e.target.value)}
+              className="block w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-navy-500/20 focus:border-navy-500 transition-all cursor-pointer"
+            >
+              <option value="All">All Types</option>
+              <option value="Public">Public (IITs/NITs)</option>
+              <option value="Private">Private (BITS, etc)</option>
             </select>
           </div>
 

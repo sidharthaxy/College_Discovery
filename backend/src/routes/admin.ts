@@ -4,18 +4,10 @@ import { PrismaClient } from '@prisma/client';
 const router = Router();
 const prisma = new PrismaClient();
 
-// Basic Authorization Middleware: checks for Bearer admin-token
-const adminAuth = (req: any, res: any, next: any) => {
-  const authHeader = req.headers['authorization'];
-  if (authHeader === 'Bearer admin-token') {
-    next();
-  } else {
-    res.status(401).json({ error: 'Unauthorized. Admin access token required.' });
-  }
-};
+import { requireAdmin } from '../middleware/auth';
 
 // Apply authorization check globally on these sub-routes
-router.use(adminAuth);
+router.use(requireAdmin);
 
 // GET /api/admin/reviews
 // List pending reviews for moderation
@@ -56,7 +48,7 @@ router.put('/reviews/:id', async (req, res) => {
     }
 
     const updated = await prisma.review.update({
-      where: { id: parseInt(id, 10) },
+      where: { id },
       data: { status }
     });
 

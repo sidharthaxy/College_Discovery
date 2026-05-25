@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { requireAuth, AuthRequest } from '../middleware/auth';
 import { PrismaClient } from '@prisma/client';
 
 const router = Router();
@@ -12,7 +13,7 @@ router.get('/', async (req, res) => {
     const where: any = {};
 
     if (collegeId) {
-      where.collegeId = parseInt(collegeId as string, 10);
+      where.collegeId = collegeId as string;
     }
     if (status) {
       where.status = status as string;
@@ -39,21 +40,22 @@ router.get('/', async (req, res) => {
 });
 
 // POST /api/reviews
-// Allows public users/students to submit reviews (defaulting to PENDING moderation status)
-router.post('/', async (req, res) => {
+// Allows authenticated users/students to submit reviews
+router.post('/', requireAuth, async (req: AuthRequest, res) => {
   try {
-    const { reviewerName, rating, comment, collegeId, isVerified } = req.body;
+    const { rating, comment, collegeId, isVerified } = req.body;
+    const userId = req.user!.id;
 
-    if (!reviewerName || !rating || !comment || !collegeId) {
+    if (!rating || !comment || !collegeId) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
     const review = await prisma.review.create({
       data: {
-        reviewerName,
-        rating: parseInt(rating, 10),
+        rating: parseInt(rating as string, 10),
         comment,
-        collegeId: parseInt(collegeId, 10),
+        collegeId: collegeId,
+        userId: userId,
         isVerified: isVerified === true || isVerified === 'true', // allow verified flag for seeding/demo submissions
         status: 'PENDING' // must be approved by admin
       }

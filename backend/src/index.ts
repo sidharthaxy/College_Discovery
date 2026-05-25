@@ -11,7 +11,8 @@ const prisma = new PrismaClient();
 
 // Configure CORS
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], // standard Vite dev ports
+  origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:5174', 'http://127.0.0.1:5174'],
+
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -22,11 +23,17 @@ app.use(express.json());
 import collegesRouter from './routes/colleges';
 app.use('/api/colleges', collegesRouter);
 
+import authRouter from './routes/auth';
+app.use('/api/auth', authRouter);
+
 import reviewsRouter from './routes/reviews';
 app.use('/api/reviews', reviewsRouter);
 
 import predictRouter from './routes/predict';
 app.use('/api/predict', predictRouter);
+
+import examsRouter from './routes/exams';
+app.use('/api/exams', examsRouter);
 
 import adminRouter from './routes/admin';
 app.use('/api/admin', adminRouter);

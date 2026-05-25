@@ -7,10 +7,10 @@ const prisma = new PrismaClient();
 // POST /api/predict
 router.post('/', async (req, res) => {
   try {
-    const { exam, category, rank } = req.body;
+    const { examId, criteria, rank } = req.body;
 
-    if (!exam || !category || rank === undefined) {
-      return res.status(400).json({ error: 'Missing required fields: exam, category, rank' });
+    if (!examId || !criteria || rank === undefined) {
+      return res.status(400).json({ error: 'Missing required fields: examId, criteria, rank' });
     }
 
     const rankNumber = parseInt(rank as string, 10);
@@ -18,15 +18,23 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Rank must be a positive integer' });
     }
 
-    // Query cutoffs matching the exam, category, and where the cutoffRank is >= user's rank
-    // (Meaning the user's rank is sufficient to meet or beat the cutoff threshold)
-    const matches = await prisma.cutoff.findMany({
+    const exam = await prisma.exam.findUnique({
+      where: { id: examId }
+    });
+
+    if (!exam) {
+      return res.status(404).json({ error: 'Exam not found' });
+    }
+
+    const isScore = exam.scoringType === 'SCORE';
+
+    // Query all cutoffs matching the examId and where the cutoffValue matches scoring math
+    // For RANK: cutoffValue >= userRank (user's rank is better/lower)
+    // For SCORE: cutoffValue <= userScore (user's score is higher/better)
+    const allCutoffs = await prisma.cutoff.findMany({
       where: {
-        exam,
-        category,
-        cutoffRank: {
-          gte: rankNumber
-        }
+        examId,
+        cutoffValue: isScore ? { lte: rankNumber } : { gte: rankNumber }
       },
       include: {
         college: {
@@ -43,8 +51,15 @@ router.post('/', async (req, res) => {
         }
       },
       orderBy: {
-        cutoffRank: 'asc' // Show tighter/more competitive cutoffs first
+        cutoffValue: isScore ? 'desc' : 'asc'
       }
+    });
+
+    // Filter the returned cutoffs in JS to ensure the DB's JSON `criteria` contains the user's requested criteria.
+    // E.g., if user asks for { category: 'OPEN' }, it will match { category: 'OPEN', branch: 'CSE', round: 6 }
+    const matches = allCutoffs.filter(c => {
+      const dbCriteria = c.criteria as Record<string, any>;
+      return Object.entries(criteria).every(([key, val]) => dbCriteria[key] === val);
     });
 
     res.json(matches);

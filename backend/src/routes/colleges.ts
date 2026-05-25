@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 // GET /api/colleges
 router.get('/', async (req, res) => {
   try {
-    const { search, maxFees, location, rating, page = 1, limit = 6 } = req.query;
+    const { search, maxFees, location, rating, institutionType, page = 1, limit = 6 } = req.query;
 
     const pageNumber = parseInt(page as string, 10);
     const limitNumber = parseInt(limit as string, 10);
@@ -21,6 +21,7 @@ router.get('/', async (req, res) => {
       where.OR = [
         { name: { contains: searchStr, mode: 'insensitive' } },
         { location: { contains: searchStr, mode: 'insensitive' } },
+        { searchTags: { contains: searchStr, mode: 'insensitive' } },
         {
           courses: {
             some: {
@@ -50,6 +51,11 @@ router.get('/', async (req, res) => {
       if (!isNaN(minRating)) {
         where.rating = { gte: minRating };
       }
+    }
+
+    // 5. Institution Type filter
+    if (institutionType && institutionType !== 'All') {
+      where.institutionType = institutionType as string;
     }
 
     // Execute query with skip and limit
@@ -93,6 +99,7 @@ router.get('/:slug', async (req, res) => {
     const college = await prisma.college.findUnique({
       where: { slug },
       include: {
+        exams: true,
         courses: {
           orderBy: { name: 'asc' }
         },
@@ -100,7 +107,7 @@ router.get('/:slug', async (req, res) => {
           orderBy: { year: 'desc' }
         },
         cutoffs: {
-          orderBy: { cutoffRank: 'asc' }
+          orderBy: { cutoffValue: 'asc' }
         },
         reviews: {
           where: { status: 'APPROVED' },

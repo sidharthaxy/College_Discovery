@@ -75,37 +75,46 @@ This roadmap details the checklist of deliverables across all phases of developm
   - [x] Visual Metric Highlight:
     - [x] Highlight the winning metric (e.g. lowest fees, highest package, etc.) in each row using a subtle green background.
 
-## Phase 4: Match Predictor Engine
+## Phase 4: Match Predictor Engine (Dynamic Schema Architecture)
 - [x] **Git Branching**
   - [x] Commit Phase 3 progress and branch off to `phase-4-match-predictor`.
-- [x] **Backend API Development**
-  - [x] Implement `POST /api/predict` endpoint:
-    - [x] Accepts: Entrance Exam, Category (Gen, OBC, SC, ST), Rank.
-    - [x] Query historical cutoffs database and match against input parameters.
-    - [x] Return list of matching colleges and their historical cutoff ranks.
-- [x] **Frontend View Development**
-  - [x] Create Rank Predictor view (`/predict`).
-  - [x] Form layout: Dropdowns for Exam and Category, text/number input for Rank.
-  - [x] Results panel underneath:
-    - [x] Display list of predicted matching colleges.
-    - [x] Show college details on the left, historical cutoff number on the right.
-- [x] **Integration**
-  - [x] Connect predictor form to the `POST /api/predict` endpoint and render returned options.
+- [x] **Database & Schema Updates**
+  - [x] Refactor Prisma schema to support `Exam` model with JSON `formSchema`.
+  - [x] Refactor `Cutoff` model to link to `Exam` and store variable parameters in a JSON `criteria` column.
+- [ ] **Backend API Development**
+  - [ ] Implement `POST /api/predict` endpoint:
+    - [ ] Accepts dynamically generated `criteria` JSON payloads.
+    - [ ] Use PostgreSQL exact JSON matching to query the `Cutoff` table.
+    - [ ] Return list of matching colleges and their historical cutoff ranks.
+- [ ] **Frontend View Development**
+  - [ ] Create Rank Predictor view (`/predict`).
+  - [ ] Form layout: Fetch available exams on mount.
+  - [ ] Dynamic Rendering: Parse the selected exam's `formSchema` JSON to dynamically generate necessary inputs (e.g., Quota, Category, Round).
+  - [ ] Results panel underneath:
+    - [ ] Display list of predicted matching colleges.
+    - [ ] Show college details on the left, historical cutoff number on the right.
+- [ ] **Integration**
+  - [ ] Connect predictor form to the `POST /api/predict` endpoint and render returned options.
 
-## Phase 5: Administrative CMS Dashboard
+## Phase 5: Administrative CMS Dashboard (Dynamic Ingestion)
 - [x] **Git Branching**
   - [x] Commit Phase 4 progress and branch off to `phase-5-admin-dashboard`.
 - [x] **Backend API Development**
   - [x] Protect admin routes under `/api/admin/*` using mock/basic admin authentication middleware.
   - [x] Implement `POST /api/admin/colleges` handling nested Prisma transactions for ingestion.
   - [x] Implement `PUT /api/admin/reviews/:id` for review status moderation (Approve/Reject).
-- [x] **Frontend View Development**
+- [ ] **Frontend View Development**
   - [x] Create `/admin` view with route protection (mock check).
-  - [x] **View 1: Add College Wizard**:
+  - [ ] **View 1: Exam Form Builder (New)**:
+    - [ ] Build a dynamic form builder at `/admin/exams/new`.
+    - [ ] Define Exam Name and add parameters (Label, Type, Options) to construct the `formSchema` JSON.
+  - [ ] **View 2: Add College Wizard**:
     - [x] 4-Step horizontal wizard (Basic Info, Courses, Placements, Cutoffs).
     - [x] Image assets upload: Include a drag-and-drop zone.
-  - [x] **View 2: Review Moderation Queue**:
+    - [ ] Enhance wizard to allow selecting supported `Exams`.
+    - [ ] Dynamically render Cutoff data-entry rows based on the selected `formSchema`.
+  - [x] **View 3: Review Moderation Queue**:
     - [x] Dense data table listing pending reviews.
     - [x] Add direct "Approve" and "Reject" actions.
-- [x] **Integration**
+- [ ] **Integration**
   - [x] Hook frontend CMS views up to the protected admin API endpoints.
