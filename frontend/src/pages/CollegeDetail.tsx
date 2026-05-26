@@ -1,3 +1,4 @@
+import { API_URL } from '../config';
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
@@ -9,27 +10,37 @@ import {
   TrendingUp,
   User,
   ShieldCheck,
+  Bookmark,
+  Trash2,
+  X,
+  Plus,
+  Edit2,
+  Eye,
+  EyeOff
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface Course {
-  id: number;
+  id: string;
   name: string;
   fees: number;
   duration: number;
 }
 
 interface Placement {
-  id: number;
+  id: string;
   year: number;
   avgPackage: number;
   highestPackage: number;
 }
 
 interface Review {
-  id: number;
-  reviewerName: string;
+  id: string;
+  user?: { name: string; };
   rating: number;
   comment: string;
+  isAnonymous: boolean;
   isVerified: boolean;
   status: string;
   createdAt: string;
@@ -101,11 +112,102 @@ export default function CollegeDetail() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'placements' | 'reviews'>('overview');
 
+  const { user, token, openAuthModal } = useAuth();
+  const navigate = useNavigate();
+
+  // Admin States
+  const [editingDescription, setEditingDescription] = useState(false);
+  const [editDescriptionValue, setEditDescriptionValue] = useState('');
+  
+  const [showAddCourse, setShowAddCourse] = useState(false);
+  const [newCourseName, setNewCourseName] = useState('');
+  const [newCourseDuration, setNewCourseDuration] = useState('');
+  const [newCourseFees, setNewCourseFees] = useState('');
+
+  const [showAddPlacement, setShowAddPlacement] = useState(false);
+  const [newPlacementYear, setNewPlacementYear] = useState('');
+  const [newPlacementHighest, setNewPlacementHighest] = useState('');
+  const [newPlacementAvg, setNewPlacementAvg] = useState('');
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+  const [deleting, setDeleting] = useState(false);
+
+  const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
+  const [editCourseData, setEditCourseData] = useState<{name: string, duration: string, fees: string}>({name: '', duration: '', fees: ''});
+
+  const [editingPlacementId, setEditingPlacementId] = useState<string | null>(null);
+  const [editPlacementData, setEditPlacementData] = useState<{year: string, highestPackage: string, avgPackage: string}>({year: '', highestPackage: '', avgPackage: ''});
+
+  const [editingStats, setEditingStats] = useState(false);
+  const [editStatsData, setEditStatsData] = useState<{avgPackage: string, highestPackage: string}>({avgPackage: '', highestPackage: ''});
+
+  const [savedCollegeIds, setSavedCollegeIds] = useState<string[]>([]);
+
+  // Fetch saved colleges if authenticated
+  useEffect(() => {
+    const fetchSavedColleges = async () => {
+      if (!user || !token) return;
+      try {
+        const res = await fetch(`${API_URL}/profile`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setSavedCollegeIds(data.savedColleges.map((sc: any) => sc.collegeId));
+        }
+      } catch (err) {
+        console.error('Error fetching saved colleges', err);
+      }
+    };
+    fetchSavedColleges();
+  }, [user, token]);
+
+  const toggleSaveCollege = async () => {
+    if (!college) return;
+    if (!user || !token) {
+      openAuthModal();
+      return;
+    }
+    
+    const isSaved = savedCollegeIds.includes(college.id.toString()); // Convert ID to string if needed
+    // Assuming college.id is string from backend DB, adjust depending on definition
+    const cid = String(college.id);
+    
+    if (isSaved) {
+      setSavedCollegeIds(prev => prev.filter(id => id !== cid));
+    } else {
+      setSavedCollegeIds(prev => [...prev, cid]);
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/profile/save-college`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ collegeId: cid })
+      });
+      if (!res.ok) throw new Error('Failed to save');
+    } catch (err) {
+      if (isSaved) {
+        setSavedCollegeIds(prev => [...prev, cid]);
+      } else {
+        setSavedCollegeIds(prev => prev.filter(id => id !== cid));
+      }
+      alert('Error saving college. Please try again.');
+    }
+  };
+
+  // Review Form State
   // Review Form State
   const [showReviewForm, setShowReviewForm] = useState(false);
-  const [reviewerName, setReviewerName] = useState('');
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [isVerifiedStudent, setIsVerifiedStudent] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -117,7 +219,7 @@ export default function CollegeDetail() {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`http://localhost:5001/api/colleges/${slug}`);
+        const response = await fetch(`${API_URL}/colleges/${slug}`);
         if (!response.ok) {
           throw new Error('College not found');
         }
@@ -141,17 +243,17 @@ export default function CollegeDetail() {
     setSubmitSuccess(false);
 
     try {
-      const response = await fetch('http://localhost:5001/api/reviews', {
+      const response = await fetch(`${API_URL}/reviews`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
         },
         body: JSON.stringify({
-          reviewerName,
           rating,
           comment,
           collegeId: college.id,
+          isAnonymous,
           isVerified: isVerifiedStudent,
         }),
       });
@@ -161,9 +263,9 @@ export default function CollegeDetail() {
       }
 
       setSubmitSuccess(true);
-      setReviewerName('');
       setRating(5);
       setComment('');
+      setIsAnonymous(false);
       setIsVerifiedStudent(false);
       
       // Auto close after 3 seconds
@@ -175,6 +277,220 @@ export default function CollegeDetail() {
       alert('Error submitting review. Please try again.');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  // --- Admin Handlers ---
+  const handleUpdateDescription = async () => {
+    if (!college || !editDescriptionValue.trim()) return;
+    try {
+      const res = await fetch(`${API_URL}/colleges/${college.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ description: editDescriptionValue })
+      });
+      if (res.ok) {
+        setCollege({ ...college, description: editDescriptionValue });
+        setEditingDescription(false);
+      } else {
+        alert('Failed to update description');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAddCourse = async () => {
+    if (!college || !newCourseName || !newCourseDuration || !newCourseFees) return;
+    try {
+      const res = await fetch(`${API_URL}/colleges/${college.id}/courses`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name: newCourseName,
+          duration: newCourseDuration,
+          fees: newCourseFees
+        })
+      });
+      if (res.ok) {
+        const newCourse = await res.json();
+        setCollege({ ...college, courses: [...college.courses, newCourse] });
+        setShowAddCourse(false);
+        setNewCourseName('');
+        setNewCourseDuration('');
+        setNewCourseFees('');
+      } else {
+        alert('Failed to add course');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAddPlacement = async () => {
+    if (!college || !newPlacementYear || !newPlacementHighest || !newPlacementAvg) return;
+    try {
+      const res = await fetch(`${API_URL}/colleges/${college.id}/placements`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          year: newPlacementYear,
+          highestPackage: newPlacementHighest,
+          avgPackage: newPlacementAvg
+        })
+      });
+      if (res.ok) {
+        const newPlacement = await res.json();
+        setCollege({ ...college, placements: [...college.placements, newPlacement].sort((a, b) => b.year - a.year) });
+        setShowAddPlacement(false);
+        setNewPlacementYear('');
+        setNewPlacementHighest('');
+        setNewPlacementAvg('');
+      } else {
+        alert('Failed to add placement');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteCollege = async () => {
+    if (!college || !adminPassword) return;
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      const res = await fetch(`${API_URL}/colleges/${college.id}/delete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ password: adminPassword })
+      });
+      if (res.ok) {
+        navigate('/');
+      } else {
+        const data = await res.json();
+        setDeleteError(data.error || 'Failed to delete college');
+      }
+    } catch (err) {
+      setDeleteError('Server error while deleting college');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleUpdateCourse = async (courseId: string) => {
+    if (!college) return;
+    try {
+      const res = await fetch(`${API_URL}/colleges/${college.id}/courses/${courseId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(editCourseData)
+      });
+      if (res.ok) {
+        const updatedCourse = await res.json();
+        setCollege({ ...college, courses: college.courses.map(c => c.id === courseId ? updatedCourse : c) });
+        setEditingCourseId(null);
+      } else {
+        alert('Failed to update course');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteCourse = async (courseId: string) => {
+    if (!college) return;
+    if (!confirm('Are you sure you want to delete this course?')) return;
+    try {
+      const res = await fetch(`${API_URL}/colleges/${college.id}/courses/${courseId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setCollege({ ...college, courses: college.courses.filter(c => c.id !== courseId) });
+      } else {
+        alert('Failed to delete course');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleUpdatePlacement = async (placementId: string) => {
+    if (!college) return;
+    try {
+      const res = await fetch(`${API_URL}/colleges/${college.id}/placements/${placementId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(editPlacementData)
+      });
+      if (res.ok) {
+        const updatedPlacement = await res.json();
+        setCollege({ ...college, placements: college.placements.map(p => p.id === placementId ? updatedPlacement : p).sort((a, b) => b.year - a.year) });
+        setEditingPlacementId(null);
+      } else {
+        alert('Failed to update placement');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeletePlacement = async (placementId: string) => {
+    if (!college) return;
+    if (!confirm('Are you sure you want to delete this placement record?')) return;
+    try {
+      const res = await fetch(`${API_URL}/colleges/${college.id}/placements/${placementId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setCollege({ ...college, placements: college.placements.filter(p => p.id !== placementId) });
+      } else {
+        alert('Failed to delete placement');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleUpdatePlacementStats = async () => {
+    if (!college) return;
+    try {
+      const res = await fetch(`${API_URL}/colleges/${college.id}/placement-stats`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(editStatsData)
+      });
+      if (res.ok) {
+        const updatedCollege = await res.json();
+        setCollege({ ...college, avgPackage: updatedCollege.avgPackage, highestPackage: updatedCollege.highestPackage });
+        setEditingStats(false);
+      } else {
+        alert('Failed to update placement stats');
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -213,7 +529,61 @@ export default function CollegeDetail() {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in relative">
+      {/* Delete College Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-navy-950/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl relative">
+            <button onClick={() => setShowDeleteModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+              <X className="w-5 h-5" />
+            </button>
+            <div className="mb-6 flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-4">
+                <Trash2 className="w-8 h-8" />
+              </div>
+              <h2 className="text-xl font-bold text-navy-900 mb-2">Delete College</h2>
+              <p className="text-slate-500 text-sm">Are you absolutely sure you want to permanently delete {college.name}? This action cannot be undone.</p>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Confirm Admin Password</label>
+                <div className="relative">
+                  <input
+                    type={showAdminPassword ? "text" : "password"}
+                    className="w-full pl-4 pr-10 py-3 rounded-lg border border-slate-200 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    placeholder="Enter password"
+                  />
+                  <button 
+                    type="button" 
+                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                    onClick={() => setShowAdminPassword(!showAdminPassword)}
+                  >
+                    {showAdminPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+              
+              {deleteError && (
+                <div className="p-3 bg-red-50 text-red-600 text-sm font-bold rounded-lg text-center">
+                  {deleteError}
+                </div>
+              )}
+
+              <button
+                onClick={handleDeleteCollege}
+                disabled={deleting}
+                className="w-full py-3 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition-colors disabled:opacity-50"
+              >
+                {deleting ? 'Deleting...' : 'Permanently Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Hero Banner Section */}
       <section className="relative rounded-2xl overflow-hidden h-[360px] shadow-md border border-slate-200">
         <img
@@ -227,8 +597,19 @@ export default function CollegeDetail() {
               <MapPin className="w-4 h-4 text-emerald-400" />
               <span>{college.location}</span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
+            <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight flex items-center gap-4">
               {college.name}
+              <button
+                onClick={toggleSaveCollege}
+                className={`p-2 rounded-full transition-colors flex-shrink-0 ${
+                  savedCollegeIds.includes(String(college.id))
+                    ? 'text-white bg-navy-500 hover:bg-navy-600'
+                    : 'text-white bg-white/20 hover:bg-white/30 backdrop-blur-md'
+                }`}
+                title={savedCollegeIds.includes(String(college.id)) ? "Remove from saved" : "Save College"}
+              >
+                <Bookmark className="w-6 h-6" fill={savedCollegeIds.includes(String(college.id)) ? "currentColor" : "none"} />
+              </button>
             </h1>
             <div className="flex items-center gap-4 mt-2">
               <div className="flex items-center gap-1 bg-emerald-500 text-white px-3 py-1 rounded-lg shadow-sm">
@@ -245,23 +626,34 @@ export default function CollegeDetail() {
 
       {/* Dynamic Tab Navigation */}
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm sticky top-16 z-30">
-        <div className="flex space-x-8 px-8 overflow-x-auto no-scrollbar">
-          {(['overview', 'courses', 'placements', 'reviews'] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`py-5 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${
-                activeTab === tab
-                  ? 'border-navy-900 text-navy-900'
-                  : 'border-transparent text-slate-400 hover:text-navy-900'
-              }`}
+        <div className="flex justify-between items-center px-8">
+          <div className="flex space-x-8 overflow-x-auto no-scrollbar">
+            {(['overview', 'courses', 'placements', 'reviews'] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`py-5 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${
+                  activeTab === tab
+                    ? 'border-navy-900 text-navy-900'
+                    : 'border-transparent text-slate-400 hover:text-navy-900'
+                }`}
+              >
+                {tab === 'overview' && 'Overview'}
+                {tab === 'courses' && 'Courses & Fees'}
+                {tab === 'placements' && 'Placements'}
+                {tab === 'reviews' && `Reviews (${college.reviews.length})`}
+              </button>
+            ))}
+          </div>
+          {user?.role === 'ADMIN' && (
+            <button 
+              onClick={() => setShowDeleteModal(true)}
+              className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2.5 rounded-lg transition-colors flex-shrink-0"
+              title="Delete College"
             >
-              {tab === 'overview' && 'Overview'}
-              {tab === 'courses' && 'Courses & Fees'}
-              {tab === 'placements' && 'Placements'}
-              {tab === 'reviews' && `Reviews (${college.reviews.length})`}
+              <Trash2 className="w-5 h-5" />
             </button>
-          ))}
+          )}
         </div>
       </div>
 
@@ -272,10 +664,31 @@ export default function CollegeDetail() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-8 space-y-6">
               <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-sm space-y-4">
-                <h2 className="text-xl font-bold text-navy-900">About {college.name}</h2>
-                <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-line">
-                  {college.description}
-                </p>
+                <div className="flex justify-between items-start">
+                  <h2 className="text-xl font-bold text-navy-900">About {college.name}</h2>
+                  {user?.role === 'ADMIN' && !editingDescription && (
+                    <button onClick={() => { setEditingDescription(true); setEditDescriptionValue(college.description); }} className="text-slate-400 hover:text-navy-600">
+                      <Edit2 className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
+                {editingDescription ? (
+                  <div className="space-y-3">
+                    <textarea 
+                      className="w-full p-4 border border-slate-300 rounded-lg text-sm text-slate-700 focus:ring-2 focus:ring-navy-500 focus:outline-none min-h-[150px]"
+                      value={editDescriptionValue}
+                      onChange={e => setEditDescriptionValue(e.target.value)}
+                    />
+                    <div className="flex justify-end gap-2">
+                      <button onClick={() => setEditingDescription(false)} className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">Cancel</button>
+                      <button onClick={handleUpdateDescription} className="px-4 py-2 text-sm font-bold text-white bg-navy-900 hover:bg-navy-800 rounded-lg">Save Changes</button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-line">
+                    {college.description}
+                  </p>
+                )}
               </div>
 
               {/* Stat Cards */}
@@ -343,21 +756,63 @@ export default function CollegeDetail() {
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-sm">
                   {college.courses.map((course) => (
-                    <tr key={course.id} className="hover:bg-slate-50/40 transition-colors">
-                      <td className="p-4 pl-8 font-bold text-navy-900">{course.name}</td>
+                    editingCourseId === course.id ? (
+                      <tr key={course.id} className="bg-slate-50">
+                        <td className="p-4 pl-8"><input type="text" value={editCourseData.name} onChange={e => setEditCourseData({...editCourseData, name: e.target.value})} className="w-full p-2 border border-slate-200 rounded text-sm" /></td>
+                        <td className="p-4 text-slate-500 font-semibold">B.Tech</td>
+                        <td className="p-4"><input type="number" value={editCourseData.duration} onChange={e => setEditCourseData({...editCourseData, duration: e.target.value})} className="w-full p-2 border border-slate-200 rounded text-sm" /></td>
+                        <td className="p-4 text-right pr-8 flex items-center justify-end gap-2">
+                          <input type="number" value={editCourseData.fees} onChange={e => setEditCourseData({...editCourseData, fees: e.target.value})} className="w-full max-w-[120px] p-2 border border-slate-200 rounded text-sm text-right" />
+                          <button onClick={() => handleUpdateCourse(course.id)} className="p-2 bg-navy-900 text-white rounded"><CheckCircle className="w-4 h-4" /></button>
+                          <button onClick={() => setEditingCourseId(null)} className="p-2 bg-slate-200 text-slate-600 rounded"><X className="w-4 h-4" /></button>
+                        </td>
+                      </tr>
+                    ) : (
+                      <tr key={course.id} className="hover:bg-slate-50/40 transition-colors group">
+                        <td className="p-4 pl-8 font-bold text-navy-900">{course.name}</td>
+                        <td className="p-4 text-slate-500 font-semibold">B.Tech</td>
+                        <td className="p-4 text-slate-500 font-medium">
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="w-4 h-4 text-slate-400" />
+                            <span>{course.duration} Years</span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-right pr-8 font-extrabold text-navy-900">
+                          <div className="flex justify-end items-center gap-4">
+                            <span>₹{(course.fees / 100000).toFixed(2)} Lakhs</span>
+                            {user?.role === 'ADMIN' && (
+                              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onClick={() => { setEditingCourseId(course.id); setEditCourseData({name: course.name, duration: course.duration.toString(), fees: course.fees.toString()}); }} className="text-slate-400 hover:text-navy-600"><Edit2 className="w-4 h-4" /></button>
+                                <button onClick={() => handleDeleteCourse(course.id)} className="text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  ))}
+                  {user?.role === 'ADMIN' && showAddCourse && (
+                    <tr className="bg-slate-50">
+                      <td className="p-4 pl-8"><input type="text" placeholder="Course Name" value={newCourseName} onChange={e => setNewCourseName(e.target.value)} className="w-full p-2 border border-slate-200 rounded text-sm" /></td>
                       <td className="p-4 text-slate-500 font-semibold">B.Tech</td>
-                      <td className="p-4 text-slate-500 flex items-center gap-1.5 font-medium">
-                        <Clock className="w-4 h-4 text-slate-400" />
-                        <span>{course.duration} Years</span>
-                      </td>
-                      <td className="p-4 text-right pr-8 font-extrabold text-navy-900">
-                        ₹{(course.fees / 100000).toFixed(2)} Lakhs
+                      <td className="p-4"><input type="number" placeholder="Years" value={newCourseDuration} onChange={e => setNewCourseDuration(e.target.value)} className="w-full p-2 border border-slate-200 rounded text-sm" /></td>
+                      <td className="p-4 text-right pr-8 flex items-center justify-end gap-2">
+                        <input type="number" placeholder="Fees in INR" value={newCourseFees} onChange={e => setNewCourseFees(e.target.value)} className="w-full max-w-[120px] p-2 border border-slate-200 rounded text-sm text-right" />
+                        <button onClick={handleAddCourse} className="p-2 bg-navy-900 text-white rounded"><CheckCircle className="w-4 h-4" /></button>
+                        <button onClick={() => setShowAddCourse(false)} className="p-2 bg-slate-200 text-slate-600 rounded"><X className="w-4 h-4" /></button>
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
+            {user?.role === 'ADMIN' && !showAddCourse && (
+              <div className="p-4 border-t border-slate-100 flex justify-center bg-slate-50/50">
+                <button onClick={() => setShowAddCourse(true)} className="flex items-center gap-2 text-sm font-bold text-navy-600 hover:text-navy-900 transition-colors">
+                  <Plus className="w-4 h-4" /> Add Course
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -365,15 +820,29 @@ export default function CollegeDetail() {
         {activeTab === 'placements' && (
           <div className="space-y-8 animate-fade-in">
             {/* Package Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
+              {user?.role === 'ADMIN' && (
+                <button 
+                  onClick={() => { setEditingStats(!editingStats); setEditStatsData({avgPackage: college.avgPackage.toString(), highestPackage: college.highestPackage.toString()}); }}
+                  className="absolute -top-3 right-0 text-slate-400 hover:text-navy-600 bg-white p-2 rounded-full shadow-sm border border-slate-100 z-10"
+                  title="Edit Placement Stats"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+              )}
+              
               <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center text-center">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">
                   Average Placement Package
                 </span>
-                <h3 className="text-3xl font-extrabold text-navy-900">
-                  ₹{college.avgPackage.toFixed(2)} LPA
-                </h3>
-                {college.placements.length > 1 && (
+                {editingStats ? (
+                  <input type="number" value={editStatsData.avgPackage} onChange={e => setEditStatsData({...editStatsData, avgPackage: e.target.value})} className="w-full text-center text-3xl font-extrabold text-navy-900 border-b-2 border-navy-500 focus:outline-none py-1" />
+                ) : (
+                  <h3 className="text-3xl font-extrabold text-navy-900">
+                    ₹{college.avgPackage.toFixed(2)} LPA
+                  </h3>
+                )}
+                {college.placements.length > 1 && !editingStats && (
                   <span className="text-xs font-bold text-emerald-600 mt-2 flex items-center justify-center gap-1">
                     <TrendingUp className="w-3.5 h-3.5" />
                     Placement growth positive this year
@@ -384,12 +853,24 @@ export default function CollegeDetail() {
                 <span className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-2 block">
                   Highest Domestic Package
                 </span>
-                <h3 className="text-3xl font-extrabold text-white">
-                  ₹{college.highestPackage.toFixed(2)} LPA
-                </h3>
-                <span className="text-xs font-semibold text-emerald-400 mt-2">
-                  Top engineering placement offer
-                </span>
+                {editingStats ? (
+                  <div className="flex flex-col items-center">
+                    <input type="number" value={editStatsData.highestPackage} onChange={e => setEditStatsData({...editStatsData, highestPackage: e.target.value})} className="w-full text-center text-3xl font-extrabold text-white bg-transparent border-b-2 border-white focus:outline-none py-1" />
+                    <div className="flex gap-2 mt-4">
+                      <button onClick={() => setEditingStats(false)} className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded text-sm font-bold">Cancel</button>
+                      <button onClick={handleUpdatePlacementStats} className="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 rounded text-sm font-bold">Save Changes</button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <h3 className="text-3xl font-extrabold text-white">
+                      ₹{college.highestPackage.toFixed(2)} LPA
+                    </h3>
+                    <span className="text-xs font-semibold text-emerald-400 mt-2">
+                      Top engineering placement offer
+                    </span>
+                  </>
+                )}
               </div>
             </div>
 
@@ -424,14 +905,84 @@ export default function CollegeDetail() {
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-sm">
                     {college.placements.map((p) => (
-                      <tr key={p.id} className="hover:bg-slate-50/30 transition-colors">
-                        <td className="p-4 pl-8 font-bold text-navy-900">{p.year}</td>
-                        <td className="p-4 text-right text-slate-600 font-medium">₹{p.avgPackage.toFixed(2)} LPA</td>
-                        <td className="p-4 text-right pr-8 font-extrabold text-navy-900">₹{p.highestPackage.toFixed(2)} LPA</td>
-                      </tr>
+                      editingPlacementId === p.id ? (
+                        <tr key={p.id} className="bg-slate-50">
+                          <td className="p-4 pl-8"><input type="number" value={editPlacementData.year} onChange={e => setEditPlacementData({...editPlacementData, year: e.target.value})} className="w-full p-2 border border-slate-200 rounded text-sm" /></td>
+                          <td className="p-4 text-right"><input type="number" value={editPlacementData.avgPackage} onChange={e => setEditPlacementData({...editPlacementData, avgPackage: e.target.value})} className="w-full p-2 border border-slate-200 rounded text-sm text-right" /></td>
+                          <td className="p-4 text-right pr-8 flex justify-end items-center gap-2">
+                            <input type="number" value={editPlacementData.highestPackage} onChange={e => setEditPlacementData({...editPlacementData, highestPackage: e.target.value})} className="w-full max-w-[120px] p-2 border border-slate-200 rounded text-sm text-right" />
+                            <button onClick={() => handleUpdatePlacement(p.id)} className="p-2 bg-navy-900 text-white rounded"><CheckCircle className="w-4 h-4" /></button>
+                            <button onClick={() => setEditingPlacementId(null)} className="p-2 bg-slate-200 text-slate-600 rounded"><X className="w-4 h-4" /></button>
+                          </td>
+                        </tr>
+                      ) : (
+                        <tr key={p.id} className="hover:bg-slate-50/30 transition-colors group">
+                          <td className="p-4 pl-8 font-bold text-navy-900">{p.year}</td>
+                          <td className="p-4 text-right text-slate-600 font-medium">₹{p.avgPackage.toFixed(2)} LPA</td>
+                          <td className="p-4 text-right pr-8 font-extrabold text-navy-900">
+                            <div className="flex justify-end items-center gap-4">
+                              <span>₹{p.highestPackage.toFixed(2)} LPA</span>
+                              {user?.role === 'ADMIN' && (
+                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button onClick={() => { setEditingPlacementId(p.id); setEditPlacementData({year: p.year.toString(), avgPackage: p.avgPackage.toString(), highestPackage: p.highestPackage.toString()}); }} className="text-slate-400 hover:text-navy-600"><Edit2 className="w-4 h-4" /></button>
+                                  <button onClick={() => handleDeletePlacement(p.id)} className="text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )
                     ))}
+                    {user?.role === 'ADMIN' && showAddPlacement && (
+                      <tr className="bg-slate-50">
+                        <td className="p-4 pl-8"><input type="number" placeholder="Year" value={newPlacementYear} onChange={e => setNewPlacementYear(e.target.value)} className="w-full p-2 border border-slate-200 rounded text-sm" /></td>
+                        <td className="p-4"><input type="number" placeholder="Avg Package(in lpa)" value={newPlacementAvg} onChange={e => setNewPlacementAvg(e.target.value)} className="w-full p-2 border border-slate-200 rounded text-sm text-right" /></td>
+                        <td className="p-4 text-right pr-8 flex items-center justify-end gap-2">
+                          <input type="number" placeholder="Highest Package(in lpa)" value={newPlacementHighest} onChange={e => setNewPlacementHighest(e.target.value)} className="w-full p-2 border border-slate-200 rounded text-sm text-right" />
+                          <button onClick={handleAddPlacement} className="p-2 bg-navy-900 text-white rounded"><CheckCircle className="w-4 h-4" /></button>
+                          <button onClick={() => setShowAddPlacement(false)} className="p-2 bg-slate-200 text-slate-600 rounded"><X className="w-4 h-4" /></button>
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
+                {user?.role === 'ADMIN' && !showAddPlacement && (
+                  <div className="p-4 border-t border-slate-100 flex justify-center bg-slate-50/50">
+                    <button onClick={() => setShowAddPlacement(true)} className="flex items-center gap-2 text-sm font-bold text-navy-600 hover:text-navy-900 transition-colors">
+                      <Plus className="w-4 h-4" /> Add Placement Trend
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+            {/* If Placements array is empty but we are Admin, allow adding initial row */}
+            {college.placements.length === 0 && user?.role === 'ADMIN' && (
+              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 text-center">
+                <p className="text-slate-500 text-sm mb-4">No placement trends recorded yet.</p>
+                {showAddPlacement ? (
+                  <div className="max-w-md mx-auto grid grid-cols-1 gap-4 text-left">
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase">Year</label>
+                      <input type="number" value={newPlacementYear} onChange={e => setNewPlacementYear(e.target.value)} className="w-full p-3 mt-1 border border-slate-200 rounded-lg text-sm" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase">Avg Package</label>
+                      <input type="number" value={newPlacementAvg} onChange={e => setNewPlacementAvg(e.target.value)} className="w-full p-3 mt-1 border border-slate-200 rounded-lg text-sm" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase">Highest Package</label>
+                      <input type="number" value={newPlacementHighest} onChange={e => setNewPlacementHighest(e.target.value)} className="w-full p-3 mt-1 border border-slate-200 rounded-lg text-sm" />
+                    </div>
+                    <div className="flex gap-2 justify-end mt-2">
+                      <button onClick={() => setShowAddPlacement(false)} className="px-4 py-2 font-bold text-slate-500 bg-slate-100 rounded-lg hover:bg-slate-200">Cancel</button>
+                      <button onClick={handleAddPlacement} className="px-4 py-2 font-bold text-white bg-navy-900 rounded-lg hover:bg-navy-800">Save</button>
+                    </div>
+                  </div>
+                ) : (
+                  <button onClick={() => setShowAddPlacement(true)} className="inline-flex items-center gap-2 text-sm font-bold text-white bg-navy-900 hover:bg-navy-800 px-5 py-2.5 rounded-lg transition-colors">
+                    <Plus className="w-4 h-4" /> Add First Placement Record
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -500,20 +1051,8 @@ export default function CollegeDetail() {
                     </div>
                   ) : (
                     <form onSubmit={handleReviewSubmit} className="space-y-4">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
-                            Your Name
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            value={reviewerName}
-                            onChange={(e) => setReviewerName(e.target.value)}
-                            placeholder="e.g. Priyesh Shah"
-                            className="block w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-navy-500/20 focus:border-navy-500"
-                          />
-                        </div>
+                      <div className="grid grid-cols-1 gap-4">
+                        {/* Name input removed: using authenticated user */}
                         <div>
                           <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
                             Overall Rating
@@ -544,6 +1083,22 @@ export default function CollegeDetail() {
                           rows={4}
                           className="block w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-navy-500/20 focus:border-navy-500"
                         />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id="isAnonymous"
+                          checked={isAnonymous}
+                          onChange={(e) => setIsAnonymous(e.target.checked)}
+                          className="w-4 h-4 rounded border-slate-300 text-navy-900 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                        />
+                        <label
+                          htmlFor="isAnonymous"
+                          className="text-xs font-bold text-slate-500 uppercase cursor-pointer"
+                        >
+                          Post Anonymously (Admin sees real name)
+                        </label>
                       </div>
 
                       <div className="flex items-center gap-2">
@@ -603,7 +1158,7 @@ export default function CollegeDetail() {
                           <div>
                             <div className="flex items-center gap-2.5">
                               <span className="text-sm font-bold text-navy-900">
-                                {review.reviewerName}
+                                {review.isAnonymous ? 'Anonymous Student' : review.user?.name || 'Anonymous'}
                               </span>
                               {review.isVerified && (
                                 <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-tight flex items-center gap-0.5">

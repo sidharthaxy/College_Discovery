@@ -1,9 +1,43 @@
+import { API_URL } from '../config';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { X, Trophy, TrendingUp, Sparkles, Plus, ArrowRightLeft } from 'lucide-react';
+import { X, Trophy, TrendingUp, Sparkles, Plus, ArrowRightLeft, Bookmark } from 'lucide-react';
 import { useCompare } from '../context/CompareContext';
+import { useAuth } from '../context/AuthContext';
 
 export default function Compare() {
   const { compareList, removeFromCompare, clearCompare } = useCompare();
+  const { user, token, openAuthModal } = useAuth();
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSaveComparison = async () => {
+    if (!user || !token) {
+      openAuthModal();
+      return;
+    }
+    setIsSaving(true);
+    try {
+      const collegeIds = compareList.map(c => String(c.id));
+      const res = await fetch(`${API_URL}/profile/save-comparison`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name: `${compareList[0].name} vs ${compareList.length > 1 ? compareList[1].name : 'Others'}`,
+          collegeIds
+        })
+      });
+      if (!res.ok) throw new Error('Failed to save comparison');
+      alert('Comparison saved successfully!');
+    } catch (error) {
+      console.error(error);
+      alert('Error saving comparison.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // Helper to determine the "winner" index for specific fields
   const getWinnerIndex = (
@@ -59,12 +93,22 @@ export default function Compare() {
           </p>
         </div>
         {compareList.length > 0 && (
-          <button
-            onClick={clearCompare}
-            className="self-start sm:self-auto text-xs font-semibold text-red-600 hover:text-red-800 transition-colors uppercase"
-          >
-            Clear Matrix
-          </button>
+          <div className="flex items-center gap-3 self-start sm:self-auto">
+            <button
+              onClick={handleSaveComparison}
+              disabled={isSaving}
+              className="text-xs font-bold bg-navy-900 text-white px-4 py-2 rounded hover:bg-navy-800 transition-colors flex items-center gap-1.5"
+            >
+              <Bookmark className="w-3.5 h-3.5" />
+              {isSaving ? 'Saving...' : 'Save Comparison'}
+            </button>
+            <button
+              onClick={clearCompare}
+              className="text-xs font-semibold text-red-600 hover:text-red-800 transition-colors uppercase"
+            >
+              Clear Matrix
+            </button>
+          </div>
         )}
       </div>
 

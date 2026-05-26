@@ -1,5 +1,6 @@
+import { API_URL } from '../config';
 import React, { useState, useEffect } from 'react';
-import { Star, Trash2, Plus, Check, X, ShieldAlert, CloudUpload, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Star, Trash2, Plus, Check, ShieldAlert, CloudUpload, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface CourseForm {
@@ -23,7 +24,9 @@ interface CutoffForm {
 
 interface AdminReview {
   id: number;
-  reviewerName: string;
+  user?: {
+    name: string;
+  };
   rating: number;
   comment: string;
   isVerified: boolean;
@@ -63,7 +66,7 @@ export default function Admin() {
   const [exams, setExams] = useState<Exam[]>([]);
   useEffect(() => {
     if (user?.role === 'ADMIN') {
-      fetch('http://localhost:5001/api/exams')
+      fetch(`${API_URL}/exams`)
         .then(res => res.json())
         .then(data => setExams(data))
         .catch(err => console.error(err));
@@ -87,6 +90,8 @@ export default function Admin() {
   
   const [logoUploaded, setLogoUploaded] = useState(false);
   const [coverUploaded, setCoverUploaded] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [coverUploading, setCoverUploading] = useState(false);
 
   const [courses, setCourses] = useState<CourseForm[]>([
     { name: 'Computer Science and Engineering', duration: 4, fees: 150000 },
@@ -186,7 +191,7 @@ export default function Admin() {
     };
 
     try {
-      const response = await fetch('http://localhost:5001/api/admin/colleges', {
+      const response = await fetch(`${API_URL}/admin/colleges`, {
         method: 'POST',
         headers: getHeaders(),
         body: JSON.stringify(payload),
@@ -208,14 +213,47 @@ export default function Admin() {
     }
   };
 
-  const triggerLogoUploadMock = () => {
-    setLogoUploaded(true);
-    setLogoUrl('https://images.unsplash.com/photo-1592280771190-3e2e4d571952?w=128&h=128&fit=crop&q=80');
-  };
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'cover') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const triggerCoverUploadMock = () => {
-    setCoverUploaded(true);
-    setCoverUrl('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1200&h=400&fit=crop&q=80');
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+    if (!cloudName || !uploadPreset) {
+      alert("Cloudinary credentials are not configured in .env");
+      return;
+    }
+
+    if (type === 'logo') setLogoUploading(true);
+    else setCoverUploading(true);
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', uploadPreset);
+
+    try {
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error?.message || 'Upload failed');
+
+      if (type === 'logo') {
+        setLogoUrl(data.secure_url);
+        setLogoUploaded(true);
+      } else {
+        setCoverUrl(data.secure_url);
+        setCoverUploaded(true);
+      }
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      if (type === 'logo') setLogoUploading(false);
+      else setCoverUploading(false);
+    }
   };
 
   // --- VIEW 2: EXAM BUILDER STATE ---
@@ -243,7 +281,7 @@ export default function Admin() {
     setExamSuccess(false);
 
     try {
-      const response = await fetch('http://localhost:5001/api/exams', {
+      const response = await fetch(`${API_URL}/exams`, {
         method: 'POST',
         headers: getHeaders(),
         body: JSON.stringify({ name: examName, scoringType, formSchema: formFields }),
@@ -256,7 +294,7 @@ export default function Admin() {
       setExamName('');
       setFormFields([]);
       // fetch exams again
-      const listRes = await fetch('http://localhost:5001/api/exams');
+      const listRes = await fetch(`${API_URL}/exams`);
       setExams(await listRes.json());
     } catch (err: any) {
       alert(err.message);
@@ -273,7 +311,7 @@ export default function Admin() {
     if (user?.role !== 'ADMIN') return;
     setReviewsLoading(true);
     try {
-      const response = await fetch('http://localhost:5001/api/admin/reviews?status=PENDING', {
+      const response = await fetch(`${API_URL}/admin/reviews?status=PENDING`, {
         headers: getHeaders(),
       });
       if (response.ok) {
@@ -295,7 +333,7 @@ export default function Admin() {
 
   const handleModerateReview = async (id: number, status: 'APPROVED' | 'REJECTED') => {
     try {
-      const response = await fetch(`http://localhost:5001/api/admin/reviews/${id}`, {
+      const response = await fetch(`${API_URL}/admin/reviews/${id}`, {
         method: 'PUT',
         headers: getHeaders(),
         body: JSON.stringify({ status }),
@@ -555,17 +593,23 @@ export default function Admin() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="block text-xs font-bold text-slate-500 uppercase">Logo Upload</label>
-                    <div onClick={triggerLogoUploadMock} className={`border-2 border-dashed rounded-lg p-5 text-center cursor-pointer ${logoUploaded ? 'border-emerald-500 bg-emerald-50/20' : 'border-slate-200 bg-slate-50'}`}>
+                    <label className={`block border-2 border-dashed rounded-lg p-5 text-center cursor-pointer transition-colors ${logoUploaded ? 'border-emerald-500 bg-emerald-50/20' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'}`}>
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, 'logo')} disabled={logoUploading} />
                       <CloudUpload className={`w-8 h-8 mx-auto ${logoUploaded ? 'text-emerald-500' : 'text-slate-400'}`} />
-                      <p className="text-xs font-bold text-navy-900 mt-2">{logoUploaded ? 'Mock Uploaded!' : 'Click to Upload Logo'}</p>
-                    </div>
+                      <p className="text-xs font-bold text-navy-900 mt-2">
+                        {logoUploading ? 'Uploading...' : logoUploaded ? 'Logo Uploaded!' : 'Click to Upload Logo'}
+                      </p>
+                    </label>
                   </div>
                   <div className="space-y-2">
                     <label className="block text-xs font-bold text-slate-500 uppercase">Cover Banner Upload</label>
-                    <div onClick={triggerCoverUploadMock} className={`border-2 border-dashed rounded-lg p-5 text-center cursor-pointer ${coverUploaded ? 'border-emerald-500 bg-emerald-50/20' : 'border-slate-200 bg-slate-50'}`}>
+                    <label className={`block border-2 border-dashed rounded-lg p-5 text-center cursor-pointer transition-colors ${coverUploaded ? 'border-emerald-500 bg-emerald-50/20' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'}`}>
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, 'cover')} disabled={coverUploading} />
                       <CloudUpload className={`w-8 h-8 mx-auto ${coverUploaded ? 'text-emerald-500' : 'text-slate-400'}`} />
-                      <p className="text-xs font-bold text-navy-900 mt-2">{coverUploaded ? 'Mock Uploaded!' : 'Click to Upload Cover'}</p>
-                    </div>
+                      <p className="text-xs font-bold text-navy-900 mt-2">
+                        {coverUploading ? 'Uploading...' : coverUploaded ? 'Cover Uploaded!' : 'Click to Upload Cover'}
+                      </p>
+                    </label>
                   </div>
                 </div>
               </div>
@@ -768,7 +812,7 @@ export default function Admin() {
                         <td className="px-6 py-4 text-xs font-bold text-navy-900">{r.college.name}</td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2 text-xs font-medium text-slate-700">
-                            {r.reviewerName}
+                            {r.user?.name || 'Anonymous'}
                             {r.isVerified && <Check className="w-3.5 h-3.5 text-emerald-500 bg-emerald-100 rounded-full p-0.5" />}
                           </div>
                         </td>

@@ -1,7 +1,9 @@
+import { API_URL } from '../config';
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Search, Star, MapPin, ArrowRightLeft, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { Search, Star, MapPin, ArrowRightLeft, ChevronLeft, ChevronRight, Check, Bookmark } from 'lucide-react';
 import { useCompare } from '../context/CompareContext';
+import { useAuth } from '../context/AuthContext';
 
 interface College {
   id: number;
@@ -39,7 +41,9 @@ export default function Discover() {
   const [institutionType, setInstitutionType] = useState(searchParams.get('institutionType') || 'All');
 
   // API State
+  const { user, token, openAuthModal } = useAuth();
   const [colleges, setColleges] = useState<College[]>([]);
+  const [savedCollegeIds, setSavedCollegeIds] = useState<string[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,7 +105,7 @@ export default function Discover() {
         queryParams.append('page', urlPage);
         queryParams.append('limit', '4'); // Limit 4 cards per page as in mockup structure
 
-        const response = await fetch(`http://localhost:5001/api/colleges?${queryParams.toString()}`);
+        const response = await fetch(`${API_URL}/colleges?${queryParams.toString()}`);
         if (!response.ok) {
           throw new Error('Failed to fetch colleges');
         }
@@ -118,6 +122,63 @@ export default function Discover() {
 
     fetchColleges();
   }, [searchParams]);
+
+  // Fetch saved colleges if authenticated
+  useEffect(() => {
+    const fetchSavedColleges = async () => {
+      if (!user || !token) {
+        setSavedCollegeIds([]);
+        return;
+      }
+      try {
+        const res = await fetch(`${API_URL}/profile`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setSavedCollegeIds(data.savedColleges.map((sc: any) => sc.collegeId));
+        }
+      } catch (err) {
+        console.error('Error fetching saved colleges', err);
+      }
+    };
+    fetchSavedColleges();
+  }, [user, token]);
+
+  const toggleSaveCollege = async (collegeId: string) => {
+    if (!user || !token) {
+      openAuthModal();
+      return;
+    }
+    
+    // Optimistic update
+    const isSaved = savedCollegeIds.includes(collegeId);
+    if (isSaved) {
+      setSavedCollegeIds(prev => prev.filter(id => id !== collegeId));
+    } else {
+      setSavedCollegeIds(prev => [...prev, collegeId]);
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/profile/save-college`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ collegeId })
+      });
+      if (!res.ok) throw new Error('Failed to save');
+    } catch (err) {
+      // Revert on error
+      if (isSaved) {
+        setSavedCollegeIds(prev => [...prev, collegeId]);
+      } else {
+        setSavedCollegeIds(prev => prev.filter(id => id !== collegeId));
+      }
+      alert('Error saving college. Please try again.');
+    }
+  };
 
   // Sync inputs with URL changes (e.g. when back/forward button is clicked or clear all is triggered)
   useEffect(() => {
@@ -395,9 +456,25 @@ export default function Discover() {
                             <h3 className="text-base font-bold text-navy-900 leading-snug hover:text-navy-700 transition-colors">
                               {college.name}
                             </h3>
-                            <div className="flex items-center gap-1 bg-slate-100 px-2 py-0.5 rounded-full text-navy-900 flex-shrink-0">
-                              <span className="text-xs font-bold">{college.rating.toFixed(1)}</span>
-                              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1 bg-slate-100 px-2 py-0.5 rounded-full text-navy-900 flex-shrink-0">
+                                <span className="text-xs font-bold">{college.rating.toFixed(1)}</span>
+                                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleSaveCollege(String(college.id));
+                                }}
+                                className={`p-1.5 rounded-full transition-colors flex-shrink-0 ${
+                                  savedCollegeIds.includes(String(college.id))
+                                    ? 'text-navy-900 bg-navy-50 hover:bg-navy-100'
+                                    : 'text-slate-300 hover:text-navy-900 hover:bg-slate-50'
+                                }`}
+                                title={savedCollegeIds.includes(String(college.id)) ? "Remove from saved" : "Save College"}
+                              >
+                                <Bookmark className="w-4 h-4" fill={savedCollegeIds.includes(String(college.id)) ? "currentColor" : "none"} />
+                              </button>
                             </div>
                           </div>
                           <div className="flex items-center gap-1 text-slate-500 text-xs mt-1.5 font-medium">

@@ -17,7 +17,7 @@ export const sendOTP = async (email: string, otpCode: string) => {
   }
 
   try {
-    const data = await resend.emails.send({
+    const response = await resend.emails.send({
       from: 'College Discovery <onboarding@resend.dev>', // resend.dev allows sending to verified emails only in testing
       to: email,
       subject: 'Your College Discovery Login OTP',
@@ -33,9 +33,14 @@ export const sendOTP = async (email: string, otpCode: string) => {
       `,
     });
     
-    return !!data.data?.id;
+    if (response.error) {
+      console.error('Failed to send OTP via Resend (API Error):', response.error);
+      return false;
+    }
+    
+    return !!response.data?.id;
   } catch (error) {
-    console.error('Failed to send OTP via Resend:', error);
+    console.error('Failed to send OTP via Resend (Exception):', error);
     return false;
   }
 };

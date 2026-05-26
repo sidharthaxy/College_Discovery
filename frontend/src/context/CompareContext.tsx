@@ -20,6 +20,7 @@ interface CompareContextType {
   removeFromCompare: (id: number) => void;
   isInCompare: (id: number) => boolean;
   clearCompare: () => void;
+  overrideCompareList: (list: CollegeSummary[]) => void;
 }
 
 const CompareContext = createContext<CompareContextType | undefined>(undefined);
@@ -82,6 +83,7 @@ export const CompareProvider: React.FC<{ children: React.ReactNode }> = ({ child
         removeFromCompare,
         isInCompare,
         clearCompare,
+        overrideCompareList: saveCompareList,
       }}
     >
       {children}

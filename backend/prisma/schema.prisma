@@ -43,6 +43,8 @@ model User {
   reviews            Review[]
   questions          Question[]         
   answers            Answer[]           
+  savedColleges      SavedCollege[]
+  savedComparisons   SavedComparison[]
 }
 
 // ==========================================
@@ -75,6 +77,7 @@ model College {
   students       User[]
   questions      Question[]  
   exams          Exam[]
+  savedByUsers   SavedCollege[]
 
   @@index([name])
   @@index([location])
@@ -132,7 +135,8 @@ model Review {
   college          College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
   rating           Int
   comment          String
-  isVerified       Boolean  @default(false) 
+  isAnonymous      Boolean  @default(false)
+  isVerified       Boolean  @default(false)
   status           String   @default("PENDING") // PENDING, APPROVED, REJECTED
   createdAt        DateTime @default(now())
 }
@@ -162,4 +166,27 @@ model Answer {
   userId     String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
+}
+
+// ==========================================
+// 5. SAVED ITEMS & PROFILE
+// ==========================================
+model SavedCollege {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collegeId String
+  college   College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, collegeId])
+}
+
+model SavedComparison {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String?  // Optional name for the comparison
+  collegeIds  String[] // Array of college IDs in the comparison
+  createdAt   DateTime @default(now())
 }

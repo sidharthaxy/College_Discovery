@@ -56,10 +56,25 @@ router.post('/', async (req, res) => {
     });
 
     // Filter the returned cutoffs in JS to ensure the DB's JSON `criteria` contains the user's requested criteria.
-    // E.g., if user asks for { category: 'OPEN' }, it will match { category: 'OPEN', branch: 'CSE', round: 6 }
+    // Handle 'state' dynamically: if college location includes user's state, they are 'Home State', else 'Other State'.
+    // Ignore 'gender' as requested.
     const matches = allCutoffs.filter(c => {
       const dbCriteria = c.criteria as Record<string, any>;
-      return Object.entries(criteria).every(([key, val]) => dbCriteria[key] === val);
+      
+      return Object.entries(criteria).every(([key, val]) => {
+        if (key === 'gender') return true; // Ignore gender
+        
+        if (key === 'state') {
+          if (!dbCriteria.state) return true; // if DB doesn't have state quota, ignore
+          
+          const isHomeState = c.college.location.toLowerCase().includes((val as string).toLowerCase());
+          const expectedStateQuota = isHomeState ? 'Home State' : 'Other State';
+          
+          return dbCriteria.state === expectedStateQuota;
+        }
+        
+        return dbCriteria[key] === val;
+      });
     });
 
     res.json(matches);

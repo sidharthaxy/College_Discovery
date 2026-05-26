@@ -10,9 +10,25 @@ const PORT = process.env.PORT || 5000;
 const prisma = new PrismaClient();
 
 // Configure CORS
-app.use(cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:5174', 'http://127.0.0.1:5174'],
+const allowedOrigins = [
+  'http://localhost:5173', 
+  'http://127.0.0.1:5173', 
+  'http://localhost:5174', 
+  'http://127.0.0.1:5174'
+];
 
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, false); // Fail silently for requests from other origins or allow all in dev if preferred
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -37,6 +53,9 @@ app.use('/api/exams', examsRouter);
 
 import adminRouter from './routes/admin';
 app.use('/api/admin', adminRouter);
+
+import profileRouter from './routes/profile';
+app.use('/api/profile', profileRouter);
 
 // Health Check / Diagnostics
 app.get('/', (req, res) => {

@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
+
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Discover from './pages/Discover';
 import CollegeDetail from './pages/CollegeDetail';
 import Compare from './pages/Compare';
 import Predictor from './pages/Predictor';
 import Admin from './pages/Admin';
+import Profile from './pages/Profile';
 import { CompareProvider, useCompare } from './context/CompareContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import AuthModal from './components/AuthModal';
 
 function Header() {
   const { compareList } = useCompare();
-  const { user, logout } = useAuth();
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { user, logout, openAuthModal, isAuthModalOpen, closeAuthModal } = useAuth();
 
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
@@ -59,19 +59,19 @@ function Header() {
             <div className="border-l border-slate-200 pl-6 flex items-center space-x-4">
               {user ? (
                 <div className="flex items-center space-x-4">
-                  <span className="text-sm font-medium text-slate-700 bg-slate-100 px-3 py-1.5 rounded-full">
+                  <Link to="/profile" className="text-sm font-bold text-navy-900 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-full transition-colors">
                     {user.name}
-                  </span>
+                  </Link>
                   <button
                     onClick={logout}
-                    className="text-sm font-medium text-slate-500 hover:text-red-600 transition-colors"
+                    className="text-sm font-medium text-red-500 hover:text-red-600 transition-colors"
                   >
                     Log Out
                   </button>
                 </div>
               ) : (
                 <button
-                  onClick={() => setIsAuthModalOpen(true)}
+                  onClick={openAuthModal}
                   className="bg-navy-600 text-white px-5 py-2 text-sm font-semibold rounded-lg hover:bg-navy-700 transition-colors shadow-sm"
                 >
                   Sign In
@@ -81,7 +81,7 @@ function Header() {
           </nav>
         </div>
       </div>
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      <AuthModal isOpen={isAuthModalOpen} onClose={closeAuthModal} />
     </header>
   );
 }
@@ -102,6 +102,7 @@ export default function App() {
                 <Route path="/compare" element={<Compare />} />
                 <Route path="/predict" element={<Predictor />} />
                 <Route path="/admin" element={<Admin />} />
+                <Route path="/profile" element={<Profile />} />
               </Routes>
             </main>
 

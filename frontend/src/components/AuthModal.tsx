@@ -1,3 +1,4 @@
+import { API_URL } from '../config';
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { auth, googleProvider } from '../lib/firebase';
@@ -19,7 +20,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   if (!isOpen) return null;
 
-  const API_URL = 'http://localhost:5001/api/auth';
+  const API_URL = `${API_URL}/auth`;
 
   const handleAuthenticate = async (e: React.FormEvent) => {
     e.preventDefault();

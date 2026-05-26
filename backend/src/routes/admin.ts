@@ -23,6 +23,11 @@ router.get('/reviews', async (req, res) => {
           select: {
             name: true
           }
+        },
+        user: {
+          select: {
+            name: true
+          }
         }
       },
       orderBy: {

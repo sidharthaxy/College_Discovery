@@ -28,6 +28,9 @@ router.get('/', async (req, res) => {
       include: {
         college: {
           select: { name: true }
+        },
+        user: {
+          select: { name: true }
         }
       }
     });
@@ -43,7 +46,7 @@ router.get('/', async (req, res) => {
 // Allows authenticated users/students to submit reviews
 router.post('/', requireAuth, async (req: AuthRequest, res) => {
   try {
-    const { rating, comment, collegeId, isVerified } = req.body;
+    const { rating, comment, collegeId, isVerified, isAnonymous } = req.body;
     const userId = req.user!.id;
 
     if (!rating || !comment || !collegeId) {
@@ -56,6 +59,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
         comment,
         collegeId: collegeId,
         userId: userId,
+        isAnonymous: isAnonymous === true || isAnonymous === 'true',
         isVerified: isVerified === true || isVerified === 'true', // allow verified flag for seeding/demo submissions
         status: 'PENDING' // must be approved by admin
       }

@@ -1,3 +1,4 @@
+import { API_URL } from '../config';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, GraduationCap, ChevronRight, Calculator } from 'lucide-react';
@@ -55,7 +56,7 @@ export default function Predictor() {
   useEffect(() => {
     const fetchExams = async () => {
       try {
-        const response = await fetch('http://localhost:5001/api/exams');
+        const response = await fetch(`${API_URL}/exams`);
         if (response.ok) {
           const data = await response.json();
           setExams(data);
@@ -109,7 +110,7 @@ export default function Predictor() {
         Object.entries(criteria).filter(([_, value]) => value !== '')
       );
 
-      const response = await fetch('http://localhost:5001/api/predict', {
+      const response = await fetch(`${API_URL}/predict`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
