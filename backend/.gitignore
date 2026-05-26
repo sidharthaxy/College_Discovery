@@ -1,3 +1,8 @@
 node_modules
 dist
 .env
+
+# Seed data and scripts
+prisma/seed.ts
+update_seed.js
+fix_nit_rourkela.ts
