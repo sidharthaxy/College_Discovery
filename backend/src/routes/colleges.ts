@@ -20,10 +20,21 @@ router.get('/', async (req, res) => {
     // 1. Search filter: match name, location, or course names
     if (search && (search as string).trim() !== '') {
       const searchStr = (search as string).trim();
+
+      // Use pg_trgm for fuzzy matching
+      const matchingColleges = await prisma.$queryRaw<{id: string}[]>`
+        SELECT id FROM "College" 
+        WHERE name % ${searchStr} 
+           OR "searchTags" % ${searchStr}
+           OR "location" % ${searchStr}
+           OR name ILIKE ${'%' + searchStr + '%'}
+      `;
+      
+      const matchedIds = matchingColleges.map(c => c.id);
+
+      // Keep courses exact match via Prisma and merge with fuzzy matched IDs
       where.OR = [
-        { name: { contains: searchStr, mode: 'insensitive' } },
-        { location: { contains: searchStr, mode: 'insensitive' } },
-        { searchTags: { contains: searchStr, mode: 'insensitive' } },
+        { id: { in: matchedIds } },
         {
           courses: {
             some: {
