@@ -14,6 +14,7 @@ This is a monorepo containing two main projects:
 4. **Admission Predictor**: Input your entrance exam (e.g., JEE Main) rank, category, and state to dynamically predict eligibility based on historical cutoffs.
 5. **User Profiles**: Sign up, save favorites, store comparison matrices, and write verified reviews.
 6. **Admin Portal**: Fully integrated admin capabilities. Add colleges, manage reviews, configure entrance exams, and edit college profiles (rows and statistics) dynamically on-the-fly.
+7. **Intelligent Fuzzy Search**: Uses PostgreSQL `pg_trgm` to seamlessly handle typos and partial matches when searching for colleges or tags.
 
 ## Quick Start (Local Development)
 

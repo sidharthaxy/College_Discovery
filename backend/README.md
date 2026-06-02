@@ -18,6 +18,9 @@ The platform's data is highly structured and heavily interconnected:
 - A `User` can save multiple `College`s (Many-to-Many).
 Using a relational database ensures **referential integrity**. If a college is deleted, its associated courses and cutoffs are cascaded seamlessly without leaving orphaned documents, which is a common hazard in NoSQL stores.
 
+### Fuzzy Search (pg_trgm)
+To provide a robust search experience without sacrificing Prisma's type safety, we employ a hybrid search architecture. We use PostgreSQL's `pg_trgm` extension and the string similarity operator (`%`) via a fast raw SQL query (`$queryRaw`) to find matching IDs. These IDs are then piped back into the standard Prisma query builder, ensuring that complex filters (like Max Fees and Pagination) remain seamlessly integrated.
+
 ### Database Schema Overview
 1. **User**: Stores credentials and `ROLE` (USER vs ADMIN). Maintains relations to Saved Colleges and Comparisons.
 2. **College**: The central entity. Contains generic stats (location, fees, rating) and one-to-many relations to granular data.
